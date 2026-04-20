@@ -28,7 +28,7 @@ Este es un juego educativo desarrollado en **Pygame** que implementa **Aprendiza
 
 El código base (`juego_pygame_mlp1.py`) ya tiene:
 
-```
+```text
 ✅ Juego funcional con Pygame
 ✅ Recolección automática de datos en modo Manual
 ✅ MLP (Multi-Layer Perceptron) básico con sklearn
@@ -83,20 +83,14 @@ Porque:
 
 ### 2.3 Flujo de Trabajo en Machine Learning
 
-```
-1. Recolección de Datos
-   ↓
-2. Preprocesamiento y Feature Engineering
-   ↓
-3. División Train/Test
-   ↓
-4. Entrenamiento del Modelo
-   ↓
-5. Evaluación con Métricas
-   ↓
-6. Optimización de Hiperparámetros
-   ↓
-7. Modelo Final en Producción
+```mermaid
+graph TD
+    A[1. Recolección de datos] --> B[2. Preprocesamiento y Feature Engineering]
+    B --> C[3. División Train/Test]
+    C --> D[4. Entrenamiento del modelo]
+    D --> E[5. Evaluación con métricas]
+    E --> F[6. Optimización de hiperparámetros]
+    F --> G[7. Modelo final en producción]
 ```
 
 ---
@@ -536,7 +530,7 @@ xgb_model = XGBClassifier(
 
 ### 4.3 Sistema de Comparación de Modelos
 
-#### Estructura de código recomendada:
+#### Estructura de código recomendada
 
 ```python
 def entrenar_todos_modelos(self) -> dict:
@@ -678,7 +672,7 @@ Un modelo que **siempre predice "no salto"** tendría 90% de accuracy, pero ser�
 
 #### Matriz de Confusión
 
-```
+```text
                 Predicción
               No-Salto  Salto
 Real No-Salto    TN      FP
@@ -694,7 +688,7 @@ Real Salto       FN      TP
 
 #### Precision (Precisión)
 
-```
+```text
 Precision = TP / (TP + FP)
 ```
 
@@ -710,7 +704,7 @@ Precision = TP / (TP + FP)
 
 #### Recall (Sensibilidad)
 
-```
+```text
 Recall = TP / (TP + FN)
 ```
 
@@ -726,7 +720,7 @@ Recall = TP / (TP + FN)
 
 #### F1-Score
 
-```
+```text
 F1 = 2 * (Precision * Recall) / (Precision + Recall)
 ```
 
@@ -1776,7 +1770,7 @@ def modo_torneo(self, modelos: dict):
 
 ### 11.1 Estructura del Proyecto Mejorado
 
-```
+```text
 pygames/
 ├── juego_pygame_mlp_mejorado.py    # Código principal mejorado
 ├── datos_mlp.csv                    # Dataset original
@@ -2325,10 +2319,13 @@ Usa esto para verificar que implementaste todo:
 
 ### Documentación Oficial
 
-- **scikit-learn**: https://scikit-learn.org/stable/
-- **Pygame**: https://www.pygame.org/docs/
-- **Matplotlib**: https://matplotlib.org/stable/contents.html
-- **Pandas**: https://pandas.pydata.org/docs/
+- **scikit-learn**: [https://scikit-learn.org/stable/](https://scikit-learn.org/stable/)
+
+- **Pygame**: [https://www.pygame.org/docs/](https://www.pygame.org/docs/)
+
+- **Matplotlib**: [https://matplotlib.org/stable/contents.html](https://matplotlib.org/stable/contents.html)
+
+- **Pandas**: [https://pandas.pydata.org/docs/](https://pandas.pydata.org/docs/)
 
 ### Tutoriales Recomendados
 
