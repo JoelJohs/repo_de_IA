@@ -1,0 +1,144 @@
+# IA (materia) - .gitignore pensado para repos livianos
+# Enfoque: ignorar entornos, caches, datasets, modelos/pesos, checkpoints y archivos grandes generados.
+
+############################
+# SO / IDE
+############################
+.DS_Store
+Thumbs.db
+
+.vscode/
+.idea/
+
+############################
+# Python
+############################
+__pycache__/
+*.py[cod]
+*.pyd
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+dist/
+build/
+*.egg-info/
+
+############################
+# Entornos
+############################
+.venv/
+venv/
+ENV/
+env/
+
+############################
+# Jupyter / IPython
+############################
+.ipynb_checkpoints/
+profile_default/
+ipython_config.py
+
+############################
+# Datos, salidas y artefactos pesados
+############################
+# Datasets crudos / procesados
+data/
+dataset/
+datasets/
+raw/
+processed/
+downloads/
+
+# Resultados/outputs típicos
+outputs/
+output/
+results/
+runs/
+logs/
+log/
+
+# Cachés de herramientas ML
+.cache/
+cache/
+wandb/
+mlruns/
+lightning_logs/
+tensorboard/
+tfevents/
+events.out.tfevents.*
+
+# Checkpoints / pesos / modelos
+checkpoints/
+checkpoint/
+ckpt/
+*.ckpt
+*.pt
+*.pth
+*.onnx
+*.tflite
+*.pb
+*.h5
+*.hdf5
+*.pkl
+*.joblib
+*.npz
+*.npy
+*.safetensors
+
+# Modelos/tokenizers de HuggingFace (descargados)
+**/models/**
+**/model/**
+**/hf_cache/**
+
+############################
+# Frontend / Node (por si el LLM/demo usa web)
+############################
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+dist/
+build/
+
+############################
+# Pygame / multimedia
+############################
+# Archivos temporales/exportados
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.gif
+*.psd
+*.aseprite
+
+############################
+# PDFs y docs pesados
+############################
+# Si querés versionar PDFs, borrá estas reglas.
+*.pdf
+
+############################
+# Secretos
+############################
+.env
+.env.*
+*.pem
+*.key
+*secret*
+*token*
+
+############################
+# Mantener ejemplos livianos
+############################
+# Permitir assets del juego (imágenes/audio) aunque sean binarios.
+!pygames/assets/**
+# Permitir el dataset chico del juego (si lo usan para entrenar algo simple)
+!pygames/datos_mlp.csv
