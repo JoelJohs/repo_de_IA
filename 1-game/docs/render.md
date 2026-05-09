@@ -29,44 +29,8 @@ Funciones:
 - `dibujar_nave`: dibuja la nave.
 - `dibujar_info_modelo`: texto con probabilidad de salto.
 
-## Cambios requeridos por la entrega
-
-### Agacharse
-
-Se recomienda agregar un sprite para el jugador agachado:
-
-- `assets/sprites/mono_crouch.png` (nombre sugerido).
-
-Si no hay sprite dedicado, se puede reescalar la imagen del jugador para simular agacharse.
-
-### Balas arriba/abajo
-
-La bala puede reutilizar el mismo sprite. Solo cambia la posicion `y`.
-
-No se requieren nuevos assets, pero si se quieren variantes visuales:
-
-- `assets/sprites/purple_ball_up.png`
-- `assets/sprites/purple_ball_down.png`
-
-## Cambios por mejoras personales
-
-### Ataque frontal
-
-Se recomienda agregar un sprite de ataque:
-
-- `assets/sprites/mono_attack.png`
-
-### Enemigo y jefes
-
-Assets recomendados:
-
-- `assets/sprites/enemy.png`
-- `assets/sprites/boss.png` (opcional si quieres variar).
-- `assets/ui/hp_bar.png` o dibujar la barra por codigo.
-
 ## Colores de UI
 
 Archivo: `src/core/constantes.py`
 
 - Colores como `AMARILLO`, `BLANCO`, `GRIS` afectan textos y HUD.
-- Para cambiar tematica visual, ajustar la paleta aqui.

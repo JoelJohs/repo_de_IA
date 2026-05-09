@@ -13,12 +13,11 @@ Responsabilidades:
 - Muestra estado actual de datos y modelo.
 - Muestra mensajes contextuales (errores o confirmaciones).
 
-## Cambios requeridos por la entrega
+## Controles que se muestran
 
-Si se agrega agacharse y nuevas balas, se recomienda actualizar los textos del menu para incluir los controles nuevos:
-
-- `ABAJO` o `S`: agacharse.
-- `X` o `K`: ataque frontal (si se implementa).
+- `M`, `A`, `T`, `C`, `F`, `Q` (modos y acciones generales).
+- `ESPACIO` para saltar.
+- `ABAJO` o `S` para agacharse.
 
 ## Textos y estados
 

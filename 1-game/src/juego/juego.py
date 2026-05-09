@@ -1,11 +1,11 @@
+from __future__ import annotations
+
 import os
-import random
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 import pygame
 
 from core.constantes import BASE_H, BASE_W, EXTRA_SCALE
-from core.tipos import Sample
 from ml.dataset import exportar_datos_csv, registrar_decision_manual
 from ml.modelo import decision_auto_saltar, entrenar_modelo
 from ml.visualizacion import graficar_datos_2d, graficar_datos_3d
@@ -19,6 +19,19 @@ from render.dibujar import (
 )
 from ui.menu import dibujar_menu
 
+from .bala import disparar_bala, mover_bala, reset_bala
+from .estado import (
+    AnimationState,
+    BulletState,
+    ModelState,
+    PlayerState,
+    RenderState,
+    ScoreState,
+)
+from .fisica import aplicar_salto, iniciar_agacharse, iniciar_salto, terminar_agacharse
+from .loop import procesar_eventos
+from .puntaje import calcular_bonus_esquiva
+
 
 class Juego:
     def __init__(self) -> None:
@@ -29,19 +42,21 @@ class Juego:
 
         start_w = BASE_W
         start_h = BASE_H
-        self.pantalla = pygame.display.set_mode(
-            (start_w, start_h), self._flags)
+        self.pantalla = pygame.display.set_mode((start_w, start_h), self._flags)
         pygame.display.set_caption("Juego: Bala + salto + MLP (solo memoria)")
 
         self.corriendo = True
         self.modo_auto = False
 
-        self.datos_modelo: List[Sample] = []
-        self.modelo = None
-        self.scaler = None
-        self.modelo_entrenado = False
-        self.clase_unica: Optional[int] = None
-        self.ultima_proba_salto: Optional[float] = None
+        self.model = ModelState(
+            datos=[],
+            modelo=None,
+            scaler=None,
+            entrenado=False,
+            clase_unica=None,
+            ultima_proba=None,
+            accion_auto="none",
+        )
 
         self.decision_window = 500
         self.decision_record_every = 3
@@ -56,27 +71,15 @@ class Juego:
         self.ship_size = (192, 192)
         self.fondo_speed = 3
 
-        self.salto = False
-        self.en_suelo = True
         self.salto_vel_inicial = 15.0
         self.gravedad = 1.0
-        self.salto_vel = self.salto_vel_inicial
-        self.agachado = False
 
-        self.current_frame = 0
-        self.frame_speed = 10
-        self.frame_count = 0
+        self.anim = AnimationState(current_frame=0, frame_speed=10, frame_count=0)
+        self.render = RenderState(fondo_x1=0, fondo_x2=start_w)
 
-        self.velocidad_bala = -12
-        self.bala_disparada = False
-        self.bala_arriba = False
-        self._bala_dist_min = None
-        self.puntaje = 0
         self._puntaje_frame = 1
         self._puntaje_esquiva_base = 25
         self._puntaje_esquiva_umbral = 200
-        self.fondo_x1 = 0
-        self.fondo_x2 = start_w
         self.mostrar_hitbox = False
         self._hitbox_bala_scale = 0.4
 
@@ -102,7 +105,6 @@ class Juego:
         self.salto_vel_inicial = 15 * self.scale
         self.salto_vel_inicial *= 1.15
         self.gravedad = 1 * self.scale
-        self.salto_vel = self.salto_vel_inicial
         self._puntaje_esquiva_umbral = int(200 * self.scale)
 
         self.decision_window = int(500 * self.scale)
@@ -124,12 +126,28 @@ class Juego:
             )
             nave_y = self.ground_y + self.player_size[1] - self.ship_size[1]
             nave_x = self.w - self.ship_size[0] - int(40 * self.scale)
-            self.nave = pygame.Rect(
-                nave_x,
-                nave_y,
-                self.ship_size[0],
-                self.ship_size[1],
-            )
+            self.nave = pygame.Rect(nave_x, nave_y, self.ship_size[0], self.ship_size[1])
+
+        self.player = PlayerState(
+            rect=self.jugador,
+            salto=False,
+            en_suelo=True,
+            salto_vel=self.salto_vel_inicial,
+            agachado=False,
+        )
+        self.bullet = BulletState(
+            rect=self.bala,
+            velocidad=int(-10 * self.scale),
+            disparada=False,
+            arriba=False,
+            dist_min=None,
+        )
+        self.score = ScoreState(
+            valor=0,
+            por_frame=self._puntaje_frame,
+            esquiva_base=self._puntaje_esquiva_base,
+            esquiva_umbral=self._puntaje_esquiva_umbral,
+        )
 
     def _cargar_assets(self) -> None:
         base = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -157,8 +175,7 @@ class Juego:
             self.pantalla = pygame.display.set_mode((w, h), pygame.FULLSCREEN)
             self._apply_resolution(w, h, reset_positions=True)
         else:
-            self.pantalla = pygame.display.set_mode(
-                (BASE_W, BASE_H), self._flags)
+            self.pantalla = pygame.display.set_mode((BASE_W, BASE_H), self._flags)
             self._apply_resolution(BASE_W, BASE_H, reset_positions=True)
         self._reset_estado_juego()
 
@@ -168,24 +185,29 @@ class Juego:
         self.nave.y = self.ground_y + self.player_size[1] - self.ship_size[1]
         self.bala.x = self.w - self.margin
         self.bala.y = self.ground_y + int(10 * self.scale)
-        self.bala_disparada = False
-        self.velocidad_bala = int(-10 * self.scale)
-        self.salto = False
-        self.en_suelo = True
-        self.salto_vel = self.salto_vel_inicial
-        self.agachado = False
-        self.bala_arriba = False
-        self._bala_dist_min = None
-        self.puntaje = 0
+
+        self.player.salto = False
+        self.player.en_suelo = True
+        self.player.salto_vel = self.salto_vel_inicial
+        self.player.agachado = False
+
+        self.bullet.disparada = False
+        self.bullet.velocidad = int(-10 * self.scale)
+        self.bullet.arriba = False
+        self.bullet.dist_min = None
+
+        self.score.valor = 0
+        self.render.fondo_x1 = 0
+        self.render.fondo_x2 = self.w
         self._decision_frame_counter = 0
-        self.fondo_x1 = 0
-        self.fondo_x2 = self.w
 
     def _reset_modelo(self) -> None:
-        self.modelo = None
-        self.scaler = None
-        self.modelo_entrenado = False
-        self.clase_unica = None
+        self.model.modelo = None
+        self.model.scaler = None
+        self.model.entrenado = False
+        self.model.clase_unica = None
+        self.model.ultima_proba = None
+        self.model.accion_auto = "none"
 
     def _calcular_hitbox_bala(self) -> pygame.Rect:
         size = max(1, int(self.bullet_size[0] * self._hitbox_bala_scale))
@@ -199,115 +221,66 @@ class Juego:
 
     def exportar_datos_csv(self) -> str:
         base = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        return exportar_datos_csv(self.datos_modelo, base)
+        return exportar_datos_csv(self.model.datos, base)
 
     def graficar_datos_2d(self) -> str:
-        return graficar_datos_2d(self.datos_modelo)
+        return graficar_datos_2d(self.model.datos)
 
     def graficar_datos_3d(self) -> str:
-        return graficar_datos_3d(self.datos_modelo)
-
-    def disparar_bala(self) -> None:
-        if not self.bala_disparada:
-            self.velocidad_bala = int(random.randint(-12, -6) * self.scale)
-            self.bala_arriba = random.choice([True, False])
-            if self.bala_arriba:
-                self.bala.y = (
-                    self.ground_y
-                    + self.player_size[1]
-                    - int(self.bullet_size[1])
-                )
-            else:
-                self.bala.y = (
-                    self.ground_y
-                    + int(self.player_size[1] * 0.35)
-                    - int(30 * self.scale)
-                )
-            self.bala_disparada = True
-            self._bala_dist_min = None
-
-    def reset_bala(self) -> None:
-        self.bala.x = self.w - self.margin
-        self.bala_disparada = False
-        self.bala_arriba = False
-        self._bala_dist_min = None
-
-    def iniciar_salto(self) -> None:
-        if self.en_suelo and not self.agachado:
-            self.salto = True
-            self.en_suelo = False
-
-    def manejar_salto(self) -> None:
-        if self.salto:
-            self.jugador.y -= int(self.salto_vel)
-            self.salto_vel -= self.gravedad
-            if self.jugador.y >= self.ground_y:
-                self.jugador.y = self.ground_y
-                self.salto = False
-                self.salto_vel = self.salto_vel_inicial
-                self.en_suelo = True
-
-    def iniciar_agacharse(self) -> None:
-        if not self.agachado and self.en_suelo:
-            nueva_altura = max(1, int(self.player_size[1] * 0.1))
-            self.jugador.height = nueva_altura
-            self.agachado = True
-
-    def terminar_agacharse(self) -> None:
-        if self.agachado:
-            self.jugador.height = self.player_size[1]
-            self.agachado = False
+        return graficar_datos_3d(self.model.datos)
 
     def registrar_decision_manual(self) -> None:
-        accion = 2 if self.agachado else 1 if not self.en_suelo else 0
-        ataque_color = 1 if self.bala_arriba else 0
+        accion = 2 if self.player.agachado else 1 if not self.player.en_suelo else 0
+        ataque_color = 1 if self.bullet.arriba else 0
         registrar_decision_manual(
-            self.datos_modelo,
-            self.bala_disparada,
+            self.model.datos,
+            self.bullet.disparada,
             self.jugador.x,
             self.bala.x,
             self.bala.y,
-            self.en_suelo,
-            self.agachado,
+            self.player.en_suelo,
+            self.player.agachado,
             accion,
-            self.velocidad_bala,
-            self.puntaje,
-            self.bala_arriba,
+            self.bullet.velocidad,
+            self.score.valor,
+            self.bullet.arriba,
             ataque_color,
         )
 
     def entrenar_modelo(self) -> Tuple[bool, str]:
-        modelo, scaler, clase_unica, mensaje = entrenar_modelo(
-            self.datos_modelo)
+        modelo, scaler, clase_unica, mensaje = entrenar_modelo(self.model.datos)
         if modelo is None and clase_unica is None:
             return False, mensaje
 
         self._reset_modelo()
-        self.modelo = modelo
-        self.scaler = scaler
-        self.modelo_entrenado = True
-        self.clase_unica = clase_unica
+        self.model.modelo = modelo
+        self.model.scaler = scaler
+        self.model.entrenado = True
+        self.model.clase_unica = clase_unica
         return True, mensaje
 
-    def decision_auto_saltar(self) -> bool:
-        if not self.modelo_entrenado:
-            return False
+    def _decidir_accion_auto(self) -> Tuple[int, Optional[float]]:
+        if not self.model.entrenado:
+            return 0, None
 
         accion, proba_salto = decision_auto_saltar(
-            self.modelo,
-            self.scaler,
-            self.clase_unica,
-            self.bala_disparada,
-            self.en_suelo,
+            self.model.modelo,
+            self.model.scaler,
+            self.model.clase_unica,
+            self.bullet.disparada,
+            self.player.en_suelo,
             self.jugador.x,
             self.bala.x,
             self.bala.y,
-            self.velocidad_bala,
-            self.puntaje,
-            self.bala_arriba,
+            self.bullet.velocidad,
+            self.score.valor,
+            self.bullet.arriba,
         )
-        self.ultima_proba_salto = proba_salto
-        return accion
+        self.model.ultima_proba = proba_salto
+        self.model.accion_auto = (
+            "salta" if accion == 1 else "agacha" if accion == 2 else "none"
+        )
+        return accion, proba_salto
 
     def mostrar_menu(self) -> None:
         msg = ""
@@ -321,8 +294,8 @@ class Juego:
                 self.w,
                 self.h,
                 self.scale,
-                len(self.datos_modelo),
-                self.modelo_entrenado,
+                len(self.model.datos),
+                self.model.entrenado,
                 self.decision_window,
                 msg,
             )
@@ -334,13 +307,13 @@ class Juego:
                 if e.type == pygame.KEYDOWN:
                     if e.key == pygame.K_m:
                         self.modo_auto = False
-                        self.datos_modelo.clear()
+                        self.model.datos.clear()
                         self._reset_modelo()
                         self._reset_estado_juego()
                         esperando = False
                         break
                     if e.key == pygame.K_a:
-                        if not self.modelo_entrenado:
+                        if not self.model.entrenado:
                             msg = "Primero entrena el MLP (T) en esta sesión."
                         else:
                             self.modo_auto = True
@@ -359,136 +332,182 @@ class Juego:
                         esperando = False
                         return
 
-    def _update_frame(self) -> None:
-        self.fondo_x1 -= self.fondo_speed
-        self.fondo_x2 -= self.fondo_speed
-        if self.fondo_x1 <= -self.w:
-            self.fondo_x1 = self.w
-        if self.fondo_x2 <= -self.w:
-            self.fondo_x2 = self.w
-        dibujar_fondo(self.pantalla, self.fondo_img,
-                      self.fondo_x1, self.fondo_x2)
+    def _update_animation(self) -> None:
+        self.anim.frame_count += 1
+        if self.anim.frame_count >= self.anim.frame_speed:
+            self.anim.current_frame = (self.anim.current_frame + 1) % len(
+                self.jugador_frames
+            )
+            self.anim.frame_count = 0
 
-        self.frame_count += 1
-        if self.frame_count >= self.frame_speed:
-            self.current_frame = (self.current_frame +
-                                  1) % len(self.jugador_frames)
-            self.frame_count = 0
-        if self.salto:
-            self.pantalla.blit(self.jugador_jump,
-                               (self.jugador.x, self.jugador.y))
-        elif self.agachado:
-            self.pantalla.blit(self.jugador_down,
-                               (self.jugador.x, self.jugador.y))
+    def _update_background(self) -> None:
+        self.render.fondo_x1 -= self.fondo_speed
+        self.render.fondo_x2 -= self.fondo_speed
+        if self.render.fondo_x1 <= -self.w:
+            self.render.fondo_x1 = self.w
+        if self.render.fondo_x2 <= -self.w:
+            self.render.fondo_x2 = self.w
+
+    def _update_bullet(self) -> None:
+        if self.bullet.disparada:
+            self.bullet.dist_min = mover_bala(
+                self.bala, self.bullet.velocidad, self.jugador.x, self.bullet.dist_min
+            )
+        if self.bala.x < -self.bullet_size[0]:
+            bonus = calcular_bonus_esquiva(
+                self.bullet.dist_min,
+                self.score.esquiva_umbral,
+                self.score.esquiva_base,
+            )
+            if bonus:
+                self.score.valor += bonus
+            self.bullet.disparada, self.bullet.arriba, self.bullet.dist_min = reset_bala(
+                self.bala, self.w - self.margin
+            )
+
+    def _update_player(self) -> None:
+        if self.player.salto:
+            salto, salto_vel, en_suelo = aplicar_salto(
+                self.jugador,
+                self.player.salto,
+                self.player.salto_vel,
+                self.gravedad,
+                self.ground_y,
+            )
+            self.player.salto = salto
+            self.player.salto_vel = salto_vel if salto else self.salto_vel_inicial
+            self.player.en_suelo = en_suelo
+
+    def _render(self) -> None:
+        dibujar_fondo(
+            self.pantalla,
+            self.fondo_img,
+            self.render.fondo_x1,
+            self.render.fondo_x2,
+        )
+
+        self._update_animation()
+        if self.player.salto:
+            self.pantalla.blit(self.jugador_jump, (self.jugador.x, self.jugador.y))
+        elif self.player.agachado:
+            self.pantalla.blit(self.jugador_down, (self.jugador.x, self.jugador.y))
         else:
             dibujar_personaje(
                 self.pantalla,
                 self.jugador_frames,
-                self.current_frame,
+                self.anim.current_frame,
                 self.jugador.x,
                 self.jugador.y,
             )
         dibujar_nave(self.pantalla, self.nave_img, self.nave.x, self.nave.y)
 
-        if self.bala_disparada:
-            self.bala.x += self.velocidad_bala
-            distancia = abs(self.jugador.x - self.bala.x)
-            if self._bala_dist_min is None:
-                self._bala_dist_min = distancia
-            else:
-                self._bala_dist_min = min(self._bala_dist_min, distancia)
-        if self.bala.x < -self.bullet_size[0]:
-            if self._bala_dist_min is not None:
-                umbral = max(1, self._puntaje_esquiva_umbral)
-                bonus = max(0, umbral - int(self._bala_dist_min))
-                self.puntaje += self._puntaje_esquiva_base + bonus
-            self.reset_bala()
-        bala_img = self.bala_img_arriba if self.bala_arriba else self.bala_img_abajo
+        bala_img = self.bala_img_arriba if self.bullet.arriba else self.bala_img_abajo
         dibujar_bala(self.pantalla, bala_img, self.bala.x, self.bala.y)
 
-        bala_hitbox = self._calcular_hitbox_bala()
-        if self.jugador.colliderect(bala_hitbox):
-            self._reset_estado_juego()
-
-        if self.modelo_entrenado and self.modo_auto:
+        if self.model.entrenado and self.modo_auto:
             dibujar_info_modelo(
-                self.pantalla, self.fuente_chica, self.ultima_proba_salto
+                self.pantalla, self.fuente_chica, self.model.ultima_proba
             )
-            accion_txt = "accion=none"
-            if self.ultima_proba_salto is not None:
-                accion_txt = f"accion={self._accion_auto}" if hasattr(self, "_accion_auto") else accion_txt
-            accion_render = self.fuente_chica.render(accion_txt, True, (255, 220, 120))
+            accion_txt = f"accion={self.model.accion_auto}"
+            accion_render = self.fuente_chica.render(
+                accion_txt, True, (255, 220, 120)
+            )
             self.pantalla.blit(accion_render, (10, 30))
 
         score_txt = self.fuente_chica.render(
-            f"puntaje={self.puntaje}", True, (255, 220, 120)
+            f"puntaje={self.score.valor}", True, (255, 220, 120)
         )
         self.pantalla.blit(score_txt, (10, 50))
 
         if self.mostrar_hitbox:
             pygame.draw.rect(self.pantalla, (80, 220, 80), self.jugador, 2)
             pygame.draw.rect(self.pantalla, (240, 80, 80), self.bala, 1)
-            pygame.draw.rect(self.pantalla, (240, 80, 80), bala_hitbox, 2)
+            pygame.draw.rect(self.pantalla, (240, 80, 80), self._calcular_hitbox_bala(), 2)
+
+    def _check_collision(self) -> None:
+        bala_hitbox = self._calcular_hitbox_bala()
+        if self.jugador.colliderect(bala_hitbox):
+            self._reset_estado_juego()
+
+    def _update_frame(self) -> None:
+        self._update_background()
+        self._update_bullet()
+        self._update_player()
+        self._check_collision()
+        self._render()
 
     def loop(self) -> None:
         reloj = pygame.time.Clock()
         self.mostrar_menu()
 
         while self.corriendo:
-            for e in pygame.event.get():
-                if e.type == pygame.QUIT:
-                    self.corriendo = False
-                elif e.type == pygame.KEYDOWN:
-                    if e.key == pygame.K_q:
-                        self.corriendo = False
-                    elif e.key in (pygame.K_ESCAPE, pygame.K_p):
-                        self._reset_estado_juego()
-                        self.mostrar_menu()
-                    elif e.key == pygame.K_f:
-                        self._toggle_fullscreen()
-                    elif (
-                        e.key == pygame.K_SPACE
-                        and (not self.modo_auto)
-                        and self.en_suelo
-                    ):
-                        salto_frame = True
-                        self.iniciar_salto()
-                    elif e.key in (pygame.K_DOWN, pygame.K_s):
-                        if not self.modo_auto:
-                            self.iniciar_agacharse()
-
-                if e.type == pygame.KEYUP:
-                    if e.key in (pygame.K_DOWN, pygame.K_s):
-                        if not self.modo_auto:
-                            self.terminar_agacharse()
+            procesar_eventos(
+                pygame.event.get(),
+                self.modo_auto,
+                self.player.en_suelo,
+                on_quit=lambda: setattr(self, "corriendo", False),
+                on_menu=self._accion_volver_menu,
+                on_fullscreen=self._toggle_fullscreen,
+                on_jump=self._accion_salto_manual,
+                on_crouch_start=self._accion_agacharse,
+                on_crouch_end=self._accion_terminar_agacharse,
+            )
 
             if not self.corriendo:
                 break
 
             if self.modo_auto:
-                accion_auto = self.decision_auto_saltar()
-                self._accion_auto = (
-                    "salta" if accion_auto == 1 else "agacha" if accion_auto == 2 else "none"
-                )
-                if accion_auto == 1:
-                    self.iniciar_salto()
-                elif accion_auto == 2:
-                    self.iniciar_agacharse()
-                elif self.agachado:
-                    self.terminar_agacharse()
+                accion, _ = self._decidir_accion_auto()
+                if accion == 1:
+                    self.player.salto = iniciar_salto(
+                        self.jugador, self.player.en_suelo, self.player.agachado
+                    )
+                elif accion == 2:
+                    self.player.agachado = iniciar_agacharse(
+                        self.jugador, self.player.agachado, self.player.en_suelo, self.player_size[1]
+                    )
+                elif self.player.agachado:
+                    self.player.agachado = terminar_agacharse(
+                        self.jugador, self.player.agachado, self.player_size[1]
+                    )
             else:
                 self.registrar_decision_manual()
 
-            if self.salto:
-                self.manejar_salto()
+            if not self.bullet.disparada:
+                self.bullet.disparada, self.bullet.velocidad, self.bullet.arriba = disparar_bala(
+                    self.bala,
+                    self.bullet.disparada,
+                    self.bullet.velocidad,
+                    self.scale,
+                    self.bullet.arriba,
+                    self.ground_y,
+                    self.player_size[1],
+                    self.bullet_size[1],
+                )
 
-            if not self.bala_disparada:
-                self.disparar_bala()
-
-            self.puntaje += self._puntaje_frame
+            self.score.valor += self.score.por_frame
 
             self._update_frame()
             pygame.display.flip()
             reloj.tick(45)
 
         pygame.quit()
+
+    def _accion_salto_manual(self) -> None:
+        self.player.salto = iniciar_salto(
+            self.jugador, self.player.en_suelo, self.player.agachado
+        )
+
+    def _accion_volver_menu(self) -> None:
+        self._reset_estado_juego()
+        self.mostrar_menu()
+
+    def _accion_agacharse(self) -> None:
+        self.player.agachado = iniciar_agacharse(
+            self.jugador, self.player.agachado, self.player.en_suelo, self.player_size[1]
+        )
+
+    def _accion_terminar_agacharse(self) -> None:
+        self.player.agachado = terminar_agacharse(
+            self.jugador, self.player.agachado, self.player_size[1]
+        )

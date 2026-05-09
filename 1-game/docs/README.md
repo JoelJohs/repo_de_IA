@@ -5,11 +5,12 @@ Esta carpeta contiene la documentacion actualizada para la entrega y mejoras per
 ## Indice
 
 - arquitectura.md: panorama del proyecto, flujo de ejecucion y modulos.
-- juego.md: logica del juego, estados, controles y nuevas mecanicas.
-- render.md: carga y dibujado de assets, escalado y puntos de cambio.
+- juego.md: logica del juego, estados y controles.
+- render.md: carga y dibujado de assets.
 - ui.md: menu, mensajes y comportamiento de interfaz.
-- ml.md: dataset actual, entrenamiento y decision automatica.
-- activos.md: inventario de assets en uso y assets faltantes.
+- ml.md: dataset, entrenamiento y decision automatica.
+- examen.md: preguntas tipo examen con respuestas cortas.
+- activos.md: inventario de assets.
 - enemigos.md: enemigo, jefes infinitos y barra de vida.
 - tema_horror.md: documentacion del juego con tematica horror religioso.
 - checklists.md: checklist de entrega y mejoras opcionales.

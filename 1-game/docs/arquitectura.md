@@ -2,46 +2,47 @@
 
 ## Objetivo general
 
-El proyecto implementa un juego simple en Pygame que permite entrenar un modelo MLP para decidir acciones (saltar o agacharse). El codigo se divide en modulos para separar: logica del juego, render, interfaz y Machine Learning.
+Implementar un juego simple en Pygame que recolecta datos en modo manual y entrena un MLP para decidir acciones en modo automatico. La estructura esta separada por componentes para poder explicar el flujo con claridad.
 
-## Estructura principal
+## Capas y responsabilidades
 
-Rutas relativas a `1-game/`:
+- Entrada: `src/juego/loop.py` (eventos y callbacks).
+- Estado: `src/juego/estado.py` (dataclasses).
+- Reglas: `src/juego/fisica.py`, `src/juego/bala.py`, `src/juego/puntaje.py`.
+- IA: `src/ml/` (dataset, entrenamiento, decision).
+- Render: `src/render/` (assets y dibujo).
+- UI: `src/ui/menu.py` (menu y mensajes).
 
-- `src/main.py`: punto de entrada. Ajusta el `sys.path` y crea `Juego().loop()`.
-- `src/juego/juego.py`: clase principal del juego. Contiene el loop, estados, colisiones y reglas.
-- `src/render/activos.py`: carga y escala de imagenes (assets).
-- `src/render/dibujar.py`: funciones de dibujo en pantalla.
-- `src/ui/menu.py`: menu de inicio y mensajes.
-- `src/ml/`: dataset, entrenamiento, decision automatica y visualizaciones.
-- `src/core/`: constantes y tipos base.
+## Flujo de ejecucion (macro)
 
-## Flujo de ejecucion
+1. `src/main.py` crea `Juego` y llama a `loop()`.
+2. `Juego` inicializa pantalla, assets y estados.
+3. Muestra menu y espera eleccion de modo.
+4. Loop principal:
+   - Input -> actualiza estado del jugador.
+   - IA -> decide accion (si modo automatico).
+   - Update -> bala, puntaje, colisiones.
+   - Render -> dibuja fondo, jugador, bala, UI.
 
-1. `src/main.py` llama a `Juego().loop()`.
-2. `Juego` inicializa Pygame, resolucion y assets.
-3. Se muestra el menu inicial (`src/ui/menu.py`).
-4. Se ejecuta el loop principal:
-   - Entrada de teclado.
-   - Registro de datos (modo manual) o decision automatica (modo auto).
-   - Actualizacion de salto, agacharse y bala.
-   - Dibujo de fondo, jugador, bala y nave.
+## Datos principales
 
-## Estados y datos principales
+- Dataset: `datos_modelo` (lista de `Sample`).
+- Modelo: MLP + scaler + clase unica (si aplica).
+- Estado jugador: salto, en_suelo, agachado.
+- Estado bala: velocidad, disparada, altura.
 
-- Estado de juego: `modo_auto`, `corriendo`, `salto`, `agachado`, `en_suelo`.
-- Estado del modelo: `modelo_entrenado`, `modelo`, `scaler`, `clase_unica`.
-- Dataset en memoria: `datos_modelo` (lista de `Sample`).
+## Puntos de modificacion frecuentes
 
-## Dependencias clave
-
-- Pygame: loop, input y render.
-- scikit-learn: `MLPClassifier`, `StandardScaler` y division train/test.
-- matplotlib: visualizacion 2D/3D (opcional).
-
-## Puntos de modificacion habituales
-
-- Cambios de mecanica: `src/juego/juego.py`.
-- Cambios de interfaz: `src/ui/menu.py`.
+- Logica de juego: `src/juego/juego.py`.
+- Reglas de movimiento: `src/juego/fisica.py`.
 - Cambios de IA: `src/ml/`.
-- Assets y render: `src/render/`.
+- Render y assets: `src/render/`.
+- UI: `src/ui/menu.py`.
+
+## Diagrama simplificado
+
+```
+Input -> Estado -> IA -> Update -> Render
+          ^                 |
+          |-----------------|
+```
