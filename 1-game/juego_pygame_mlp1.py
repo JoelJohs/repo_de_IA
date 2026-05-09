@@ -85,7 +85,7 @@ class Juego:
         self.scale = 1.0
         self.margin = 50
         self.ground_y = self.h - 100
-        self.player_size = (32, 48)
+        self.player_size = (38, 58)
         self.bullet_size = (16, 16)
         self.ship_size = (64, 64)
         # Velocidad de desplazamiento del fondo
@@ -121,7 +121,7 @@ class Juego:
         ground_offset = int(100 * self.scale)
         self.ground_y = self.h - ground_offset
 
-        self.player_size = (int(32 * self.scale), int(48 * self.scale))
+        self.player_size = (int(38 * self.scale), int(58 * self.scale))
         self.bullet_size = (int(16 * self.scale), int(16 * self.scale))
         self.ship_size = (int(64 * self.scale), int(64 * self.scale))
         self.fondo_speed = max(1, int(2 * self.scale))
@@ -164,11 +164,17 @@ class Juego:
 
         base = os.path.dirname(__file__)
         self.jugador_frames = [
-            safe_load(os.path.join(base, "assets/sprites/mono_frame_1.png"), self.player_size),
-            safe_load(os.path.join(base, "assets/sprites/mono_frame_2.png"), self.player_size),
-            safe_load(os.path.join(base, "assets/sprites/mono_frame_3.png"), self.player_size),
-            safe_load(os.path.join(base, "assets/sprites/mono_frame_4.png"), self.player_size),
+            safe_load(os.path.join(base, "assets/sprites/walk_frame1.png"), self.player_size),
+            safe_load(os.path.join(base, "assets/sprites/walk_frame2.png"), self.player_size),
+            safe_load(os.path.join(base, "assets/sprites/walk_frame3.png"), self.player_size),
+            safe_load(os.path.join(base, "assets/sprites/walk_frame4.png"), self.player_size),
         ]
+        self.jugador_jump = safe_load(
+            os.path.join(base, "assets/sprites/jump.png"), self.player_size
+        )
+        self.jugador_down = safe_load(
+            os.path.join(base, "assets/sprites/down.png"), self.player_size
+        )
         self.bala_img = safe_load(
             os.path.join(base, "assets/sprites/purple_ball.png"),
             self.bullet_size,
@@ -521,7 +527,10 @@ class Juego:
             self.current_frame = (self.current_frame + 1) % len(self.jugador_frames)
             self.frame_count = 0
 
-        self.pantalla.blit(self.jugador_frames[self.current_frame], (self.jugador.x, self.jugador.y))
+        if self.salto:
+            self.pantalla.blit(self.jugador_jump, (self.jugador.x, self.jugador.y))
+        else:
+            self.pantalla.blit(self.jugador_frames[self.current_frame], (self.jugador.x, self.jugador.y))
         self.pantalla.blit(self.nave_img, (self.nave.x, self.nave.y))
 
         if self.bala_disparada:
@@ -600,4 +609,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
