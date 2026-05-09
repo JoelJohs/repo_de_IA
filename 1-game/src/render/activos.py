@@ -43,18 +43,23 @@ def cargar_activos(
     jugador_down = cargar_superficie_segura(
         os.path.join(base_dir, "assets/sprites/down.png"), player_size
     )
-    bala_img = cargar_superficie_segura(
-        os.path.join(base_dir, "assets/sprites/purple_ball.png"),
+    bala_img_arriba = cargar_superficie_segura(
+        os.path.join(base_dir, "assets/game/red_atack.png"),
         bullet_size,
-        (160, 120, 255, 255),
+        (200, 60, 60, 255),
+    )
+    bala_img_abajo = cargar_superficie_segura(
+        os.path.join(base_dir, "assets/game/yellow_atack.png"),
+        bullet_size,
+        (240, 200, 80, 255),
     )
     fondo_img = cargar_superficie_segura(
-        os.path.join(base_dir, "assets/game/fondo2.png"),
+        os.path.join(base_dir, "assets/game/background.png"),
         screen_size,
         (40, 40, 40, 255),
     )
     nave_img = cargar_superficie_segura(
-        os.path.join(base_dir, "assets/game/ufo.png"),
+        os.path.join(base_dir, "assets/game/enemy.png"),
         ship_size,
         (140, 255, 200, 255),
     )
@@ -63,7 +68,8 @@ def cargar_activos(
         "jugador_frames": jugador_frames,
         "jugador_jump": jugador_jump,
         "jugador_down": jugador_down,
-        "bala_img": bala_img,
+        "bala_img_arriba": bala_img_arriba,
+        "bala_img_abajo": bala_img_abajo,
         "fondo_img": fondo_img,
         "nave_img": nave_img,
     }

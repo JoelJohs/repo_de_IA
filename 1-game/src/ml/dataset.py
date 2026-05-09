@@ -10,8 +10,14 @@ def registrar_decision_manual(
     bala_disparada: bool,
     jugador_x: int,
     bala_x: int,
+    bala_y: int,
     en_suelo: bool,
+    agachado: bool,
+    accion: int,
     velocidad_bala: int,
+    puntaje: int,
+    bala_arriba: bool,
+    ataque_color: int,
 ) -> None:
     if not bala_disparada:
         return
@@ -22,6 +28,12 @@ def registrar_decision_manual(
             velocidad_bala=float(velocidad_bala),
             distancia=float(distancia),
             salto=salto_label,
+            bala_y=float(bala_y),
+            bala_arriba=1 if bala_arriba else 0,
+            agachado=1 if agachado else 0,
+            accion=int(accion),
+            puntaje=int(puntaje),
+            ataque_color=int(ataque_color),
         )
     )
 
@@ -35,9 +47,33 @@ def exportar_datos_csv(datos_modelo: List[Sample], base_dir: str) -> str:
     try:
         with open(ruta, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
-            writer.writerow(["velocidad_bala", "distancia", "salto"])
+            writer.writerow(
+                [
+                    "velocidad_bala",
+                    "distancia",
+                    "salto",
+                    "bala_y",
+                    "bala_arriba",
+                    "agachado",
+                    "accion",
+                    "puntaje",
+                    "ataque_color",
+                ]
+            )
             for s in datos_modelo:
-                writer.writerow([s.velocidad_bala, s.distancia, s.salto])
+                writer.writerow(
+                    [
+                        s.velocidad_bala,
+                        s.distancia,
+                        s.salto,
+                        s.bala_y,
+                        s.bala_arriba,
+                        s.agachado,
+                        s.accion,
+                        s.puntaje,
+                        s.ataque_color,
+                    ]
+                )
     except Exception as e:
         return f"Error al guardar CSV: {e}"
 

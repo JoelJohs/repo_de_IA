@@ -13,12 +13,28 @@ def entrenar_modelo(
     samples = list(datos_modelo)
     if len(samples) < 80:
         return None, None, None, "Necesitas más datos (>= 80). Juega en MANUAL."
-    X = [[s.velocidad_bala, s.distancia] for s in samples]
-    y = [s.salto for s in samples]
+    X = [
+        [
+            s.velocidad_bala,
+            s.distancia,
+            s.bala_y,
+            float(s.bala_arriba),
+            float(s.puntaje),
+            float(s.ataque_color),
+        ]
+        for s in samples
+    ]
+    y = [s.accion for s in samples]
     clases = sorted(set(y))
     if len(clases) < 2:
         clase_unica = int(clases[0])
-        tipo = "SIEMPRE NO-SALTA (0)" if clase_unica == 0 else "SIEMPRE SALTA (1)"
+        tipo = (
+            "SIEMPRE NADA (0)"
+            if clase_unica == 0
+            else "SIEMPRE SALTA (1)"
+            if clase_unica == 1
+            else "SIEMPRE AGACHA (2)"
+        )
         return (
             None,
             None,
@@ -52,27 +68,43 @@ def decision_auto_saltar(
     en_suelo: bool,
     jugador_x: int,
     bala_x: int,
+    bala_y: int,
     velocidad_bala: int,
-) -> Tuple[bool, Optional[float]]:
+    puntaje: int,
+    bala_arriba: bool,
+) -> Tuple[int, Optional[float]]:
     if (not bala_disparada) or (not en_suelo):
-        return False, None
+        return 0, None
 
     distancia = abs(jugador_x - bala_x)
 
     if clase_unica is not None and modelo is None:
         proba_salto = 1.0 if clase_unica == 1 else 0.0
-        return clase_unica == 1, proba_salto
+        return clase_unica, proba_salto
 
     if modelo is None or scaler is None:
-        return False, None
+        return 0, None
 
-    X = [[float(velocidad_bala), float(distancia)]]
+    X = [
+        [
+            float(velocidad_bala),
+            float(distancia),
+            float(bala_y),
+            1.0 if bala_arriba else 0.0,
+            float(puntaje),
+            1.0 if bala_arriba else 0.0,
+        ]
+    ]
     Xs = scaler.transform(X)
     if hasattr(modelo, "predict_proba"):
-        proba_salto = float(modelo.predict_proba(Xs)[0][1])
-        decision = proba_salto >= 0.5
-        return decision, proba_salto
+        proba = modelo.predict_proba(Xs)[0]
+        clases = list(modelo.classes_)
+        proba_salto = None
+        if 1 in clases:
+            proba_salto = float(proba[clases.index(1)])
+        pred = int(modelo.predict(Xs)[0])
+        return pred, proba_salto
 
     pred = int(modelo.predict(Xs)[0])
     proba_salto = 1.0 if pred == 1 else 0.0
-    return pred == 1, proba_salto
+    return pred, proba_salto

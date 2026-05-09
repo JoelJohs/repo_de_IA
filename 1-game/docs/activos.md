@@ -15,12 +15,14 @@ Sprites del jugador:
 
 Otros sprites:
 
-- `assets/sprites/purple_ball.png`
-- `assets/game/ufo.png`
+- `assets/sprites/purple_ball.png` (legacy)
+- `assets/game/enemy.png`
+- `assets/game/red_atack.png`
+- `assets/game/yellow_atack.png`
 
 Fondos:
 
-- `assets/game/fondo2.png`
+- `assets/game/background.png`
 
 ## Assets faltantes (segun nuevas mecanicas)
 

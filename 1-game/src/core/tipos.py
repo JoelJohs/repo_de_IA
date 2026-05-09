@@ -7,6 +7,12 @@ class Sample:
     velocidad_bala: float
     distancia: float
     salto: int
+    bala_y: float
+    bala_arriba: int
+    agachado: int
+    accion: int
+    puntaje: int
+    ataque_color: int
 
 
 @dataclass
