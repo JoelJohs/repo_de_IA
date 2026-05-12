@@ -8,7 +8,7 @@ Esta carpeta contiene la documentacion actualizada para la entrega y mejoras per
 - juego.md: logica del juego, estados y controles.
 - render.md: carga y dibujado de assets.
 - ui.md: menu, mensajes y comportamiento de interfaz.
-- ml.md: dataset, entrenamiento y decision automatica.
+- ml.md: dataset, entrenamiento, decision automatica y sesgo de estilo.
 - examen.md: preguntas tipo examen con respuestas cortas.
 - activos.md: inventario de assets.
 - enemigos.md: enemigo, jefes infinitos y barra de vida.

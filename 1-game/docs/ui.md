@@ -9,7 +9,7 @@ Funcion: `dibujar_menu(...)`
 Responsabilidades:
 
 - Pinta el fondo.
-- Renderiza el titulo y opciones.
+- Renderiza el titulo desde `assets/game/title.png` y las opciones.
 - Muestra estado actual de datos y modelo.
 - Muestra mensajes contextuales (errores o confirmaciones).
 
@@ -33,3 +33,16 @@ Lineas de estado mostradas:
 
 - Los mensajes se muestran con `fuente_chica`.
 - Si el modelo no esta entrenado y se presiona `A`, se muestra advertencia.
+
+## Estilo visual (retro + horror religioso)
+
+- Fondo con la imagen `assets/game/title.png` escalada a pantalla completa.
+- Viñeta ligera para mejorar contraste del texto.
+- Panel semitransparente para el bloque de opciones.
+- Acentos dorados en teclas y texto blanco para legibilidad.
+
+## Layout del menu
+
+- La imagen `assets/game/title.png` es TODO el fondo y ya incluye el titulo.
+- El menu se dibuja en la parte inferior de la imagen, dentro de un panel oscuro.
+- El bloque de estado queda al final del panel.

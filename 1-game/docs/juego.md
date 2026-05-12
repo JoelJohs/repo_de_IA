@@ -18,6 +18,21 @@ Este documento explica el funcionamiento del juego por componentes y el flujo de
 3. Se actualizan estados (salto, bala, colision, puntaje).
 4. Se dibuja la escena.
 
+En modo manual, el input se registra como decision (accion) para entrenar el estilo real del jugador,
+no solo el estado fisico del personaje.
+
+En modo automatico, el agachado puede mantenerse como "hold" si el estilo dominante del jugador es
+agacharse. Esto hace que la IA copie el estilo (aunque sea malo) y no solo esquive.
+
+El menu usa una imagen de titulo y organiza las opciones en un panel debajo para mejorar la lectura.
+
+Valores actuales de estilo (para explicar al profesor):
+
+- Historial de estilo: 200 muestras.
+- Minimo de muestras para activar estilo: 40.
+- Umbral de dominancia: 0.55.
+- Hold de agachado cuando la IA predice agachar (si no domina estilo): 20 frames.
+
 ## Estado del juego (resumen)
 
 - Jugador: posicion, salto, en_suelo, salto_vel, agachado.
@@ -25,6 +40,7 @@ Este documento explica el funcionamiento del juego por componentes y el flujo de
 - Puntaje: valor total, incremento por frame, bonus por esquiva.
 - Render: posiciones de scroll del fondo.
 - Modelo: dataset, modelo entrenado, ultima probabilidad.
+- Estilo: historial de acciones manuales para imitar el comportamiento del jugador en modo auto.
 
 ## Controles
 
