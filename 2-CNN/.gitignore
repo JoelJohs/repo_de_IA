@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.venv/
+artifacts/
+models/
+dataset/
+logs/
+*.h5
+*.keras
+*.csv
+*.json
+*.png
+*.jpg
+*.jpeg
+*.tiff
+*.bmp

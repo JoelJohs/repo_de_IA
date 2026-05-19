@@ -5,6 +5,7 @@ Repositorio académico con proyectos de Inteligencia Artificial. Cada carpeta co
 ## Índice
 
 1. [Proyecto 1 - Juego con IA (Pygame + MLP)](#proyecto-1---juego-con-ia-pygame--mlp)
+2. [Proyecto 2 - CNN para clasificar animales](#proyecto-2---cnn-para-clasificar-animales)
 
 ## Proyecto 1 - Juego con IA (Pygame + MLP)
 
@@ -13,3 +14,11 @@ Este proyecto implementa un juego en Pygame que registra decisiones del jugador 
 - Ruta: `1-game/`
 - Ejecución: `python -m src.main`
 - Dependencias: `1-game/requirements.txt`
+
+## Proyecto 2 - CNN para clasificar animales
+
+Proyecto de clasificacion de imagenes basado en los notebooks entregados por el profesor. Los notebooks son solo referenciales y no se modifican; la implementacion se organiza como proyecto separado con scripts y GUI.
+
+- Ruta: `2-CNN/`
+- Referencias: `2-CNN/CNN.ipynb`, `2-CNN/CNNriesgo.ipynb`
+- Documento principal: `2-CNN/README.md`

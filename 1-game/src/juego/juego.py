@@ -67,6 +67,17 @@ class Juego:
         self._auto_crouch_hold_frames = 0
         self._auto_crouch_hold_max = 20
         self._auto_crouch_hold_infinite = False
+        self._auto_crouch_cycle = False
+        self._auto_crouch_on_remaining = 0
+        self._auto_crouch_off_remaining = 0
+        self._auto_crouch_on_len = 0
+        self._auto_crouch_off_len = 0
+
+        self._manual_prev_agachado = False
+        self._manual_crouch_frames = 0
+        self._manual_stand_frames = 0
+        self._crouch_durations: Deque[int] = deque(maxlen=60)
+        self._crouch_pauses: Deque[int] = deque(maxlen=60)
 
         self.decision_window = 500
         self.decision_record_every = 3
@@ -214,6 +225,16 @@ class Juego:
         self._crouch_hold = False
         self._auto_crouch_hold_frames = 0
         self._auto_crouch_hold_infinite = False
+        self._auto_crouch_cycle = False
+        self._auto_crouch_on_remaining = 0
+        self._auto_crouch_off_remaining = 0
+        self._auto_crouch_on_len = 0
+        self._auto_crouch_off_len = 0
+        self._manual_prev_agachado = False
+        self._manual_crouch_frames = 0
+        self._manual_stand_frames = 0
+        self._crouch_durations.clear()
+        self._crouch_pauses.clear()
 
     def _reset_modelo(self) -> None:
         self.model.modelo = None
@@ -227,6 +248,16 @@ class Juego:
         self._crouch_hold = False
         self._auto_crouch_hold_frames = 0
         self._auto_crouch_hold_infinite = False
+        self._auto_crouch_cycle = False
+        self._auto_crouch_on_remaining = 0
+        self._auto_crouch_off_remaining = 0
+        self._auto_crouch_on_len = 0
+        self._auto_crouch_off_len = 0
+        self._manual_prev_agachado = False
+        self._manual_crouch_frames = 0
+        self._manual_stand_frames = 0
+        self._crouch_durations.clear()
+        self._crouch_pauses.clear()
 
     def _calcular_hitbox_bala(self) -> pygame.Rect:
         size = max(1, int(self.bullet_size[0] * self._hitbox_bala_scale))
@@ -286,6 +317,57 @@ class Juego:
             return accion_dom
         return None
 
+    def _actualizar_patron_agacharse_manual(self) -> None:
+        agachado = self.player.agachado or self._crouch_hold
+        if agachado:
+            self._manual_crouch_frames += 1
+            if not self._manual_prev_agachado and self._manual_stand_frames > 0:
+                self._crouch_pauses.append(self._manual_stand_frames)
+                self._manual_stand_frames = 0
+        else:
+            self._manual_stand_frames += 1
+            if self._manual_prev_agachado and self._manual_crouch_frames > 0:
+                self._crouch_durations.append(self._manual_crouch_frames)
+                self._manual_crouch_frames = 0
+        self._manual_prev_agachado = agachado
+
+    def _clamp(self, value: int, min_value: int, max_value: int) -> int:
+        return max(min_value, min(max_value, value))
+
+    def _calcular_patron_agacharse(self) -> Tuple[int, int]:
+        base_on_min = int(6 * self.scale)
+        base_on_max = int(45 * self.scale)
+        base_off_min = int(6 * self.scale)
+        base_off_max = int(60 * self.scale)
+        if not self._crouch_durations:
+            dur = int(14 * self.scale)
+        else:
+            dur = int(sum(self._crouch_durations) / len(self._crouch_durations))
+        if not self._crouch_pauses:
+            pausa = int(12 * self.scale)
+        else:
+            pausa = int(sum(self._crouch_pauses) / len(self._crouch_pauses))
+        dur = self._clamp(dur, base_on_min, base_on_max)
+        pausa = self._clamp(pausa, base_off_min, base_off_max)
+        return dur, pausa
+
+    def _aplicar_ciclo_agacharse_auto(self) -> int:
+        if not self._auto_crouch_cycle:
+            return 2
+        if self._auto_crouch_on_remaining <= 0 and self._auto_crouch_off_remaining <= 0:
+            self._auto_crouch_on_remaining = self._auto_crouch_on_len
+        if self._auto_crouch_on_remaining > 0:
+            self._auto_crouch_on_remaining -= 1
+            if self._auto_crouch_on_remaining == 0:
+                self._auto_crouch_off_remaining = self._auto_crouch_off_len
+            return 2
+        if self._auto_crouch_off_remaining > 0:
+            self._auto_crouch_off_remaining -= 1
+            if self._auto_crouch_off_remaining == 0:
+                self._auto_crouch_on_remaining = self._auto_crouch_on_len
+            return 0
+        return 0
+
     def entrenar_modelo(self) -> Tuple[bool, str]:
         modelo, scaler, clase_unica, mensaje = entrenar_modelo(self.model.datos)
         if modelo is None and clase_unica is None:
@@ -320,9 +402,19 @@ class Juego:
         if accion_estilo is not None:
             accion = accion_estilo
             if accion_estilo == 2:
-                self._auto_crouch_hold_infinite = True
+                self._auto_crouch_hold_infinite = False
+                self._auto_crouch_cycle = True
+                on_len, off_len = self._calcular_patron_agacharse()
+                if on_len != self._auto_crouch_on_len or off_len != self._auto_crouch_off_len:
+                    self._auto_crouch_on_len = on_len
+                    self._auto_crouch_off_len = off_len
+                    self._auto_crouch_on_remaining = on_len
+                    self._auto_crouch_off_remaining = 0
+            else:
+                self._auto_crouch_cycle = False
         else:
             self._auto_crouch_hold_infinite = False
+            self._auto_crouch_cycle = False
             if accion == 2:
                 self._auto_crouch_hold_frames = self._auto_crouch_hold_max
         self.model.accion_auto = (
@@ -506,6 +598,8 @@ class Juego:
 
             if self.modo_auto:
                 accion, _ = self._decidir_accion_auto()
+                if self._auto_crouch_cycle and accion == 2:
+                    accion = self._aplicar_ciclo_agacharse_auto()
                 if accion == 1:
                     self.player.salto = iniciar_salto(
                         self.jugador, self.player.en_suelo, self.player.agachado
@@ -535,6 +629,7 @@ class Juego:
                             self.jugador, self.player.agachado, self.player_size[1]
                         )
             else:
+                self._actualizar_patron_agacharse_manual()
                 self.registrar_decision_manual()
 
             if not self.bullet.disparada:

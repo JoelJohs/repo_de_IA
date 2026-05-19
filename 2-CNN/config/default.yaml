@@ -1,0 +1,28 @@
+project:
+  name: cnn-animales
+  seed: 42
+
+data:
+  dataset_dir: dataset
+  image_size: [21, 28]
+  channels: 3
+  validation_split: 0.2
+  test_split: 0.2
+  batch_size: 64
+  shuffle: true
+
+training:
+  epochs: 20
+  learning_rate: 0.001
+  optimizer: sgd
+  early_stopping: true
+  patience: 5
+
+model:
+  type: baseline_cnn
+  dropout: 0.5
+
+output:
+  artifacts_dir: artifacts
+  models_dir: models
+  logs_dir: logs

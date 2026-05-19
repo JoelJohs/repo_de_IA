@@ -12,7 +12,14 @@ def entrenar_modelo(
 ) -> Tuple[Optional[MLPClassifier], Optional[StandardScaler], Optional[int], str]:
     samples = list(datos_modelo)
     if len(samples) < 80:
-        return None, None, None, "Necesitas más datos (>= 80). Juega en MANUAL."
+        clase_unica = 0
+        return (
+            None,
+            None,
+            clase_unica,
+            "Modelo trivial entrenado: SIEMPRE NADA (0)."
+            " Junta datos (>= 80) para un modelo más fino.",
+        )
     X = [
         [
             s.velocidad_bala,
