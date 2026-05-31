@@ -8,6 +8,7 @@ import pygame
 
 from core.constantes import BASE_H, BASE_W, EXTRA_SCALE
 from ml.dataset import exportar_datos_csv, registrar_decision_manual
+from ml.arbol import decision_auto_arbol, entrenar_arbol
 from ml.modelo import decision_auto_saltar, entrenar_modelo
 from ml.visualizacion import graficar_datos_2d, graficar_datos_3d
 from render.activos import cargar_activos
@@ -48,13 +49,17 @@ class Juego:
 
         self.corriendo = True
         self.modo_auto = False
+        self._auto_modelo = "mlp"
 
         self.model = ModelState(
             datos=[],
-            modelo=None,
+            modelo_mlp=None,
             scaler=None,
-            entrenado=False,
-            clase_unica=None,
+            entrenado_mlp=False,
+            clase_unica_mlp=None,
+            modelo_arbol=None,
+            entrenado_arbol=False,
+            clase_unica_arbol=None,
             ultima_proba=None,
             accion_auto="none",
         )
@@ -130,8 +135,8 @@ class Juego:
 
         self.decision_window = int(500 * self.scale)
 
-        self.fuente = pygame.font.SysFont("Arial", int(24 * self.scale))
-        self.fuente_chica = pygame.font.SysFont("Arial", int(18 * self.scale))
+        self.fuente = pygame.font.SysFont("Arial", int(21 * self.scale))
+        self.fuente_chica = pygame.font.SysFont("Arial", int(16 * self.scale))
 
         self._cargar_assets()
 
@@ -237,10 +242,13 @@ class Juego:
         self._crouch_pauses.clear()
 
     def _reset_modelo(self) -> None:
-        self.model.modelo = None
+        self.model.modelo_mlp = None
         self.model.scaler = None
-        self.model.entrenado = False
-        self.model.clase_unica = None
+        self.model.entrenado_mlp = False
+        self.model.clase_unica_mlp = None
+        self.model.modelo_arbol = None
+        self.model.entrenado_arbol = False
+        self.model.clase_unica_arbol = None
         self.model.ultima_proba = None
         self.model.accion_auto = "none"
         self._estilo_hist.clear()
@@ -374,29 +382,55 @@ class Juego:
             return False, mensaje
 
         self._reset_modelo()
-        self.model.modelo = modelo
+        self.model.modelo_mlp = modelo
         self.model.scaler = scaler
-        self.model.entrenado = True
-        self.model.clase_unica = clase_unica
+        self.model.entrenado_mlp = True
+        self.model.clase_unica_mlp = clase_unica
+        return True, mensaje
+
+    def entrenar_arbol(self) -> Tuple[bool, str]:
+        modelo, clase_unica, mensaje = entrenar_arbol(self.model.datos)
+        if modelo is None and clase_unica is None:
+            return False, mensaje
+
+        self._reset_modelo()
+        self.model.modelo_arbol = modelo
+        self.model.entrenado_arbol = True
+        self.model.clase_unica_arbol = clase_unica
         return True, mensaje
 
     def _decidir_accion_auto(self) -> Tuple[int, Optional[float]]:
-        if not self.model.entrenado:
-            return 0, None
-
-        accion, proba_salto = decision_auto_saltar(
-            self.model.modelo,
-            self.model.scaler,
-            self.model.clase_unica,
-            self.bullet.disparada,
-            self.player.en_suelo,
-            self.jugador.x,
-            self.bala.x,
-            self.bala.y,
-            self.bullet.velocidad,
-            self.score.valor,
-            self.bullet.arriba,
-        )
+        if self._auto_modelo == "arbol":
+            if not self.model.entrenado_arbol:
+                return 0, None
+            accion, proba_salto = decision_auto_arbol(
+                self.model.modelo_arbol,
+                self.model.clase_unica_arbol,
+                self.bullet.disparada,
+                self.player.en_suelo,
+                self.jugador.x,
+                self.bala.x,
+                self.bala.y,
+                self.bullet.velocidad,
+                self.score.valor,
+                self.bullet.arriba,
+            )
+        else:
+            if not self.model.entrenado_mlp:
+                return 0, None
+            accion, proba_salto = decision_auto_saltar(
+                self.model.modelo_mlp,
+                self.model.scaler,
+                self.model.clase_unica_mlp,
+                self.bullet.disparada,
+                self.player.en_suelo,
+                self.jugador.x,
+                self.bala.x,
+                self.bala.y,
+                self.bullet.velocidad,
+                self.score.valor,
+                self.bullet.arriba,
+            )
         self.model.ultima_proba = proba_salto
         accion_estilo = self._obtener_accion_estilo()
         if accion_estilo is not None:
@@ -435,7 +469,9 @@ class Juego:
                 self.h,
                 self.scale,
                 len(self.model.datos),
-                self.model.entrenado,
+                self.model.entrenado_mlp,
+                self.model.entrenado_arbol,
+                self._auto_modelo,
                 self.decision_window,
                 msg,
             )
@@ -453,15 +489,28 @@ class Juego:
                         esperando = False
                         break
                     if e.key == pygame.K_a:
-                        if not self.model.entrenado:
-                            msg = "Primero entrena el MLP (T) en esta sesión."
+                        if not self.model.entrenado_mlp:
+                            msg = "Primero entrena el MLP (T) en esta sesion."
                         else:
                             self.modo_auto = True
+                            self._auto_modelo = "mlp"
+                            self._reset_estado_juego()
+                            esperando = False
+                            break
+                    if e.key == pygame.K_r:
+                        if not self.model.entrenado_arbol:
+                            msg = "Primero entrena el Arbol (D) en esta sesion."
+                        else:
+                            self.modo_auto = True
+                            self._auto_modelo = "arbol"
                             self._reset_estado_juego()
                             esperando = False
                             break
                     if e.key == pygame.K_t:
                         ok, info = self.entrenar_modelo()
+                        msg = info if ok else f"Error: {info}"
+                    if e.key == pygame.K_d:
+                        ok, info = self.entrenar_arbol()
                         msg = info if ok else f"Error: {info}"
                     if e.key == pygame.K_c:
                         msg = self.exportar_datos_csv()
@@ -544,7 +593,7 @@ class Juego:
         bala_img = self.bala_img_arriba if self.bullet.arriba else self.bala_img_abajo
         dibujar_bala(self.pantalla, bala_img, self.bala.x, self.bala.y)
 
-        if self.model.entrenado and self.modo_auto:
+        if (self.model.entrenado_mlp or self.model.entrenado_arbol) and self.modo_auto:
             dibujar_info_modelo(
                 self.pantalla, self.fuente_chica, self.model.ultima_proba
             )

@@ -30,11 +30,11 @@ La funcion `exportar_datos_csv()` guarda los datos en `datos_mlp.csv` con esas c
 
 ## Entrenamiento
 
-Archivo: `src/ml/modelo.py`
+Archivos: `src/ml/modelo.py` (MLP) y `src/ml/arbol.py` (Arbol de Decision)
 
 `entrenar_modelo(datos_modelo)`:
 
-- Requiere al menos 80 muestras.
+- Si hay menos de 80 muestras, devuelve un modelo trivial que siempre predice 0 (no hacer nada).
 - Separa train/test con `train_test_split` estratificado.
 - Escala los datos con `StandardScaler`.
 - Entrena un `MLPClassifier`.
@@ -42,14 +42,20 @@ Archivo: `src/ml/modelo.py`
 
 Si el dataset solo tiene una clase, se devuelve un modelo trivial que siempre predice esa accion.
 
+`entrenar_arbol(datos_modelo)`:
+
+- Mismo criterio de datos y clases que el MLP.
+- Entrena un `DecisionTreeClassifier` con profundidad moderada.
+- Devuelve accuracy en test.
+
 ## Decision automatica
 
-Archivo: `src/ml/modelo.py`
+Archivos: `src/ml/modelo.py` (MLP) y `src/ml/arbol.py` (Arbol)
 
-`decision_auto_saltar(...)`:
+`decision_auto_saltar(...)` y `decision_auto_arbol(...)`:
 
 - Si no hay bala o el jugador no esta en suelo, devuelve accion 0.
-- Si hay modelo, calcula probabilidades y predice accion.
+- Si hay modelo, calcula probabilidades (cuando aplica) y predice accion.
 
 ## Sesgo de estilo (imitar al jugador)
 

@@ -50,9 +50,12 @@ class RenderState:
 @dataclass
 class ModelState:
     datos: List[Sample]
-    modelo: Optional[object]
+    modelo_mlp: Optional[object]
     scaler: Optional[object]
-    entrenado: bool
-    clase_unica: Optional[int]
+    entrenado_mlp: bool
+    clase_unica_mlp: Optional[int]
+    modelo_arbol: Optional[object]
+    entrenado_arbol: bool
+    clase_unica_arbol: Optional[int]
     ultima_proba: Optional[float]
     accion_auto: str

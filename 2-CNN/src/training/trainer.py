@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import logging
 from typing import Dict, Tuple
 
 import tensorflow as tf
@@ -13,14 +14,26 @@ class TrainingResult:
     model_path: str
 
 
-def compile_model(model: tf.keras.Model, learning_rate: float, optimizer: str) -> None:
+def compile_model(
+    model: tf.keras.Model,
+    learning_rate: float,
+    optimizer: str,
+    logger: logging.Logger,
+) -> None:
     optimizer_name = optimizer.lower()
     if optimizer_name == "sgd":
-        opt = tf.keras.optimizers.SGD(learning_rate=learning_rate)
+        opt = tf.keras.optimizers.SGD(
+            learning_rate=learning_rate,
+            decay=learning_rate / 100,
+        )
     elif optimizer_name == "adam":
         opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
     else:
         raise ValueError(f"Unsupported optimizer: {optimizer}")
+
+    logger.info("Compiling model")
+    logger.info("Optimizer: %s", optimizer_name)
+    logger.info("Learning rate: %s", learning_rate)
 
     model.compile(
         loss=tf.keras.losses.CategoricalCrossentropy(),
@@ -37,9 +50,11 @@ def train_model(
     early_stopping: bool,
     patience: int,
     checkpoint_path: str,
+    logger: logging.Logger,
 ) -> Tuple[tf.keras.callbacks.History, str]:
     callbacks = []
     if early_stopping:
+        logger.info("Early stopping enabled (patience=%s)", patience)
         callbacks.append(
             tf.keras.callbacks.EarlyStopping(
                 monitor="val_loss",
@@ -48,6 +63,7 @@ def train_model(
             )
         )
 
+    logger.info("Model checkpoint: %s", checkpoint_path)
     callbacks.append(
         tf.keras.callbacks.ModelCheckpoint(
             filepath=checkpoint_path,
@@ -56,6 +72,10 @@ def train_model(
         )
     )
 
+    logger.info("Starting training")
+    logger.info("Epochs: %s", epochs)
+    logger.info("Train batches: %s", tf.data.experimental.cardinality(train_ds).numpy())
+    logger.info("Validation batches: %s", tf.data.experimental.cardinality(val_ds).numpy())
     history = model.fit(
         train_ds,
         epochs=epochs,
@@ -63,10 +83,17 @@ def train_model(
         callbacks=callbacks,
         verbose=1,
     )
+    logger.info("Training complete")
     return history, checkpoint_path
 
 
-def evaluate_model(model: tf.keras.Model, test_ds: tf.data.Dataset) -> Dict[str, float]:
+def evaluate_model(
+    model: tf.keras.Model,
+    test_ds: tf.data.Dataset,
+    logger: logging.Logger,
+) -> Dict[str, float]:
+    logger.info("Evaluating model")
     results = model.evaluate(test_ds, verbose=1)
     metrics = dict(zip(model.metrics_names, results))
+    logger.info("Evaluation metrics: %s", metrics)
     return metrics

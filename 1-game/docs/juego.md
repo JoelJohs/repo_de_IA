@@ -45,8 +45,10 @@ Valores actuales de estilo (para explicar al profesor):
 ## Controles
 
 - `M`: modo manual (reinicia dataset y modelo).
-- `A`: modo automatico (usa MLP entrenado).
+- `A`: modo automatico MLP.
 - `T`: entrena MLP.
+- `R`: modo automatico Arbol.
+- `D`: entrena Arbol de Decision.
 - `C`: exporta CSV.
 - `F`: fullscreen.
 - `Q`: salir.

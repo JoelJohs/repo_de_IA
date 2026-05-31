@@ -1,10 +1,9 @@
 # Proyecto 2 - CNN para clasificar animales
 
-Este proyecto toma como referencia los notebooks entregados por el profesor y los convierte en una base organizada para un flujo de trabajo moderno (dataset configurable, entrenamiento reproducible, guardado de modelo e inferencia). Los notebooks **no se modifican** y se mantienen como material referencial.
+Este proyecto toma como referencia el notebook entregado por el profesor y lo convierte en una base organizada para un flujo de trabajo moderno (dataset configurable, entrenamiento reproducible, guardado de modelo e inferencia). Los notebooks **no se modifican** y se mantienen como material referencial.
 
-Referencias originales (no tocar):
+Referencia original (no tocar):
 - `2-CNN/CNN.ipynb`
-- `2-CNN/CNNriesgo.ipynb`
 
 ## Objetivo
 
@@ -13,7 +12,7 @@ Clasificar imágenes de 5 clases:
 - aranas
 - pajaros
 - ballenas
-- changos
+- monos
 
 La primera etapa es **clasificacion** (por carpetas). Deteccion con bounding boxes no aplica porque no hay etiquetas de cajas.
 
@@ -27,7 +26,7 @@ dataset/
   aranas/
   pajaros/
   ballenas/
-  changos/
+  monos/
 ```
 
 ## Lo que aportan los notebooks
@@ -75,6 +74,8 @@ Fragmentos clave (referencia):
 Instalar dependencias:
 
 ```
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 

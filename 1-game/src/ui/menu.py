@@ -58,7 +58,9 @@ def dibujar_menu(
     h: int,
     scale: float,
     datos_modelo_len: int,
-    modelo_entrenado: bool,
+    modelo_entrenado_mlp: bool,
+    modelo_entrenado_arbol: bool,
+    modelo_auto: str,
     decision_window: int,
     msg: str = "",
 ) -> None:
@@ -67,8 +69,10 @@ def dibujar_menu(
 
     opciones = [
         ("M", "Manual (reinicia dataset y borra modelo)"),
-        ("A", "Auto (usa MLP; sin modelo NO salta)"),
+        ("A", "Auto MLP (usa MLP; sin modelo NO salta)"),
         ("T", "Entrenar MLP"),
+        ("R", "Auto Arbol (usa Decision Tree)"),
+        ("D", "Entrenar Arbol"),
         ("C", "Exportar datos a CSV"),
         ("F", "Fullscreen (toggle)"),
         ("Q", "Salir"),
@@ -84,7 +88,7 @@ def dibujar_menu(
         content_h += int(10 * scale) + fuente_chica.get_linesize()
 
     menu_pad_x = int(80 * scale)
-    menu_pad_y = int(14 * scale)
+    menu_pad_y = int(18 * scale)
     menu_w = w - menu_pad_x * 2
     menu_h = content_h + menu_pad_y * 2
     menu_bottom = h - int(18 * scale)
@@ -103,8 +107,14 @@ def dibujar_menu(
         y += line_h + pad
 
     y += int(6 * scale)
+    auto_label = "MLP" if modelo_auto == "mlp" else "Arbol"
     estado = [
-        f"Memoria: {datos_modelo_len} | Modelo: {'sí' if modelo_entrenado else 'no'}",
+        "Memoria: {datos} | MLP: {mlp} | Arbol: {arbol} | Auto: {auto}".format(
+            datos=datos_modelo_len,
+            mlp="si" if modelo_entrenado_mlp else "no",
+            arbol="si" if modelo_entrenado_arbol else "no",
+            auto=auto_label,
+        ),
         f"Resolución: {w}x{h} | scale≈{scale:.2f} | ventana_decisión≈{decision_window}",
     ]
     for line in estado:

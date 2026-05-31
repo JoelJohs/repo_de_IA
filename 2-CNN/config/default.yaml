@@ -3,8 +3,8 @@ project:
   seed: 42
 
 data:
-  dataset_dir: dataset
-  image_size: [21, 28]
+  dataset_dir: ../dataset
+  image_size: [32, 32]
   channels: 3
   validation_split: 0.2
   test_split: 0.2
@@ -12,10 +12,10 @@ data:
   shuffle: true
 
 training:
-  epochs: 20
-  learning_rate: 0.001
+  epochs: 40
+  learning_rate: 0.005
   optimizer: sgd
-  early_stopping: true
+  early_stopping: false
   patience: 5
 
 model:
