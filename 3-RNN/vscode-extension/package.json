@@ -1,0 +1,75 @@
+{
+  "name": "rnn-c-autocomplete",
+  "displayName": "RNN Autocomplete (C)",
+  "description": "Char-level vanilla RNN for C code autocomplete (Proyecto 3 - IA).",
+  "version": "0.1.0",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Programming Languages", "Other"],
+  "activationEvents": [
+    "onLanguage:c"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "rnnC.complete",
+        "title": "RNN: completar linea",
+        "category": "RNN"
+      },
+      {
+        "command": "rnnC.suggest",
+        "title": "RNN: elegir siguiente caracter",
+        "category": "RNN"
+      },
+      {
+        "command": "rnnC.status",
+        "title": "RNN: estado del servidor",
+        "category": "RNN"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "rnnC.complete",
+        "key": "ctrl+shift+space",
+        "when": "editorTextFocus && editorLangId == c"
+      }
+    ],
+    "configuration": {
+      "title": "RNN Autocomplete",
+      "properties": {
+        "rnnC.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Python executable to spawn the stdio server with."
+        },
+        "rnnC.serverScript": {
+          "type": "string",
+          "default": "src/server_stdio.py",
+          "description": "Path (relative to project root or absolute) of server_stdio.py."
+        },
+        "rnnC.modelPath": {
+          "type": "string",
+          "default": "models/rnn_v1.keras",
+          "description": "Optional model .keras path. If empty, the server uses its default."
+        },
+        "rnnC.maxNew": {
+          "type": "integer",
+          "default": 60,
+          "minimum": 1,
+          "maximum": 400,
+          "description": "How many chars to generate per completion."
+        },
+        "rnnC.temperature": {
+          "type": "number",
+          "default": 0.4,
+          "minimum": 0.0,
+          "maximum": 2.0,
+          "description": "Sampling temperature. 0 = greedy."
+        }
+      }
+    }
+  }
+}

@@ -1,8 +1,5 @@
-tensorflow
-numpy
-pandas
-scikit-learn
-matplotlib
-jupyter
-fastapi
-uvicorn
+tensorflow==2.16.1
+numpy<2.0
+fastapi>=0.110
+uvicorn[standard]>=0.27
+pydantic>=2.5
