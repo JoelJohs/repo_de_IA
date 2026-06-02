@@ -11,16 +11,18 @@ Char-level vanilla RNN autocompletion for C files. Spawns
    ```
 2. Press `F5` → "Run Extension" launches a new VS Code window with the
    extension loaded.
+3. Open a `.c` file in that window and press **Ctrl+Shift+Space**.
 
 ## Install (production)
 
 ```bash
 cd vscode-extension
-vsce package          # produces a .vsix (needs `npm i -g @vscode/vsce`)
+npm install -g @vscode/vsce
+vsce package
 code --install-extension rnn-c-autocomplete-0.1.0.vsix
 ```
 
-## Configuration (settings.json)
+## Configuration (settings.json del workspace)
 
 ```json
 {
@@ -32,11 +34,33 @@ code --install-extension rnn-c-autocomplete-0.1.0.vsix
 }
 ```
 
-## Usage
+Por defecto la extension corre desde la raiz del primer workspace
+folder abierto. Si tu proyecto no es 3-RNN, ajusta `rnnC.serverScript`
+a una ruta absoluta.
 
-Open a `.c` file and press **Ctrl+Shift+Space** → inserts the model's
-continuation at the cursor. Use the command palette → "RNN: estado del
-servidor" to ping the server.
+## Probar el servidor sin abrir VS Code
 
-The server is a long-lived subprocess. The first keystroke triggers
-~5-10 s of TF warmup (one-time model load); subsequent calls are fast.
+```bash
+cd /home/jojo/develop/academic/IA/3-RNN
+source .venv/bin/activate
+node vscode-extension/test_e2e.js
+```
+
+`test_e2e.js` implementa **exactamente** el flujo de extension.js:
+spawn del server, lectura/escritura JSON por linea, manejo de stderr
+(tail-only). Si esto pasa, la extension va a funcionar.
+
+## Commands
+
+| Command | Keybind | Funcion |
+|---|---|---|
+| `RNN: completar linea` | `Ctrl+Shift+Space` (en archivos `.c`) | Inserta la continuacion en el cursor |
+| `RNN: elegir siguiente caracter` | (palette) | Muestra quick-pick con top-5 chars |
+| `RNN: estado del servidor` | (palette) | Ping para confirmar que el server vive |
+
+## Notas de timing
+
+- **Primer spawn**: ~5-10 s. Carga el modelo `.keras` en memoria.
+- **Calls subsiguientes**: <1 s por completion de 20 chars.
+- **Memoria**: ~500 MB RAM retenidos mientras la ventana este abierta
+  (modelo + tensores).

@@ -10,6 +10,17 @@ data:
   test_split: 0.2
   batch_size: 64
   shuffle: true
+  raw_source:
+    path: /home/jojo/Imágenes/dataset_crudo
+    class_mapping:
+      aranas: aranas
+      ballenas: ballenas
+      pajaros: pajaros
+      ranas: ranas
+      simios: monos
+  processing:
+    jpeg_quality: 90
+    allowed_extensions: [jpg, jpeg, png, bmp, tiff, webp]
 
 training:
   epochs: 40

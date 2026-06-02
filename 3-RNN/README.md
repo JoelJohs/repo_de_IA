@@ -111,6 +111,55 @@ echo '{"id":1,"method":"complete","prefix":"int sum","max_new":40}' | \
 5. **Extension VS Code en `vscode-extension/`** - instala con F5 y
    usa Ctrl+Shift+Space en cualquier archivo `.c`.
 
+## Como usar en VS Code
+
+### Modo desarrollo (F5)
+
+1. Abrir la carpeta de la extension en VS Code:
+   ```bash
+   code vscode-extension/
+   ```
+2. Presionar **F5** → se abre una ventana "Extension Development Host"
+   con la extension cargada.
+3. En esa ventana, abrir un archivo `.c` y presionar
+   **Ctrl+Shift+Space** → inserta la continuacion en el cursor.
+
+### Instalacion permanente (en tu VS Code real)
+
+```bash
+cd vscode-extension
+npm install -g @vscode/vsce
+vsce package
+code --install-extension rnn-c-autocomplete-0.1.0.vsix
+```
+
+### Probar el servidor sin VS Code
+
+```bash
+# Smoke test del JSON-line protocol (lo que usa la extension)
+node vscode-extension/test_e2e.js
+
+# O mas simple, con echo + python directo
+echo '{"id":1,"method":"complete","prefix":"int sum","max_new":20}' | \
+     python src/server_stdio.py models/rnn_v1.keras
+```
+
+### Configuracion por proyecto (settings.json del workspace)
+
+```json
+{
+  "rnnC.pythonPath": "python",
+  "rnnC.serverScript": "src/server_stdio.py",
+  "rnnC.modelPath": "models/rnn_v1.keras",
+  "rnnC.maxNew": 60,
+  "rnnC.temperature": 0.4
+}
+```
+
+Los defaults ya apuntan a `models/rnn_v1.keras` y `src/server_stdio.py`
+**relativos a la raiz del proyecto 3-RNN** (la extension usa el primer
+workspace folder como raiz). Si tu estructura cambia, ajustar aca.
+
 ## Arquitectura del modelo
 
 ```python

@@ -5,3 +5,5 @@ matplotlib==3.9.0
 scikit-image==0.23.2
 PyQt6==6.7.0
 PyYAML==6.0.2
+Pillow==10.4.0
+tqdm==4.66.5

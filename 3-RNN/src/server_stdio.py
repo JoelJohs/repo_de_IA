@@ -28,7 +28,13 @@ from pathlib import Path
 
 import numpy as np
 
-from .predict import RNNModel, _encode, _sample
+# Allow running this file directly (`python src/server_stdio.py ...`)
+# in addition to `python -m src.server_stdio ...`.
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    from src.predict import RNNModel, _encode, _sample
+else:
+    from .predict import RNNModel, _encode, _sample
 
 DEFAULT_MODEL = Path("models/rnn_v1.keras")
 

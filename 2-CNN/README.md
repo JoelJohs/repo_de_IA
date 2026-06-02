@@ -79,6 +79,53 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## Preparacion del dataset
+
+Las imagenes **no** se versionan en el repo (estan ignoradas en
+`.gitignore` por peso). Se distribuyen por separado y hay que dejarlas
+en `dataset/<clase>/` antes de entrenar. El formato esperado es una
+carpeta por clase con JPGs 32x32, nombrados
+`<clase>__<origen>__<6-digit-index>.jpg`.
+
+Hay dos formas de obtener el dataset:
+
+### 1. Descargar el dataset ya procesado
+
+Ubicarlo en `2-CNN/dataset/<clase>/` (la estructura exacta se ve en
+"Estructura de dataset" mas arriba). Si viene en un zip, descomprimirlo
+alli.
+
+### 2. Regenerarlo desde las imagenes crudas
+
+Las imagenes crudas viven en una carpeta externa (configurable en
+`data.raw_source.path`, por defecto `/home/jojo/Imágenes/dataset_crudo`)
+con una subcarpeta por especie. El script `build_processed_dataset` las
+lee, las redimensiona a `data.image_size`, las recodifica como JPG y las
+guarda en `dataset/<clase>/`.
+
+Comando:
+
+```
+python -m src.data.build_processed_dataset --config config/default.yaml
+```
+
+Flags utiles:
+
+- `--source PATH` sobreescribe `data.raw_source.path`.
+- `--output PATH` sobreescribe `data.dataset_dir`.
+- `--jpeg-quality N` sobreescribe `data.processing.jpeg_quality` (1-100).
+- `--dry-run` cuenta y reporta cuantas imagenes procesaria por clase sin escribir nada.
+
+Mapeo por defecto (`data.raw_source.class_mapping`):
+
+| Carpeta origen | Carpeta final |
+| --- | --- |
+| aranas   | aranas   |
+| ballenas | ballenas |
+| pajaros  | pajaros  |
+| ranas    | ranas    |
+| simios   | monos    |
+
 Entrenar:
 
 ```
