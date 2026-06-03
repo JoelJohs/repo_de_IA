@@ -38,6 +38,10 @@ from .puntaje import calcular_bonus_esquiva
 class Juego:
     def __init__(self) -> None:
         pygame.init()
+        pygame.mixer.init()
+        self._audio_base = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "audio"
+        )
 
         self._flags = 0
         self._fullscreen = False
@@ -240,6 +244,21 @@ class Juego:
         self._manual_stand_frames = 0
         self._crouch_durations.clear()
         self._crouch_pauses.clear()
+
+    def _musica_menu(self) -> None:
+        ruta = os.path.join(self._audio_base, "menu.mp3")
+        if os.path.isfile(ruta):
+            pygame.mixer.music.load(ruta)
+            pygame.mixer.music.play(-1)
+
+    def _musica_game(self) -> None:
+        ruta = os.path.join(self._audio_base, "game.mp3")
+        if os.path.isfile(ruta):
+            pygame.mixer.music.load(ruta)
+            pygame.mixer.music.play(-1)
+
+    def _musica_stop(self) -> None:
+        pygame.mixer.music.stop()
 
     def _reset_modelo(self) -> None:
         self.model.modelo_mlp = None
@@ -457,6 +476,7 @@ class Juego:
         return accion, proba_salto
 
     def mostrar_menu(self) -> None:
+        self._musica_menu()
         msg = ""
         esperando = True
         self._decision_frame_counter = 0
@@ -628,6 +648,7 @@ class Juego:
     def loop(self) -> None:
         reloj = pygame.time.Clock()
         self.mostrar_menu()
+        self._musica_game()
 
         while self.corriendo:
             procesar_eventos(

@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).parent.parent.parent
 VECTORDB_DIR = BASE_DIR / "vectordb"
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 COLLECTION_NAME = "seguridad_mexico"
-OLLAMA_MODEL = "qwen2.5:7b-instruct"
+OLLAMA_MODEL = "qwen2.5:0.5b"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
 PROMPT_TEMPLATE = """Eres un asistente experto en seguridad pública en México.
@@ -26,6 +26,12 @@ Contexto:
 Pregunta: {question}
 
 Respuesta (basada únicamente en el contexto proporcionado):"""
+
+# Frases introductorias comunes que Ollama a veces añade antes de responder
+SKIP_PREFIXES = [
+    "aquí está", "aquí tienes", "claro", "por supuesto",
+    "basado", "de acuerdo", "respuesta:", "answer:",
+]
 
 
 def format_docs(docs):
@@ -45,7 +51,7 @@ def load_vectorstore():
     )
 
 
-def ask_ollama_stream(prompt, model=OLLAMA_MODEL):
+def ask_ollama_stream(prompt, model):
     payload = {
         "model": model,
         "prompt": prompt,
@@ -68,47 +74,62 @@ def ask_ollama_stream(prompt, model=OLLAMA_MODEL):
     return full
 
 
-def query_once(question, k=5):
-    print(f"  Loading vectorstore...", end=" ", flush=True)
+def query_once(question, k=5, model=OLLAMA_MODEL):
+    print(f"  Cargando vectorstore...", end=" ", flush=True)
     t0 = time.time()
     vectordb = load_vectorstore()
     retriever = vectordb.as_retriever(search_kwargs={"k": k})
-    print(f"done ({time.time()-t0:.1f}s)")
-    print(f"  Retrieving chunks...", end=" ", flush=True)
+    print(f"hecho ({time.time()-t0:.1f}s)")
+    print(f"  Recuperando chunks...", end=" ", flush=True)
     docs = retriever.invoke(question)
-    print(f"done ({len(docs)} docs)")
+    print(f"hecho ({len(docs)} chunks)")
+
+    show_sources(docs, "Contexto")
 
     context = format_docs(docs)
     prompt = PROMPT_TEMPLATE.format(context=context, question=question)
 
-    print(f"\n  qwen2.5:7b en CPU (~0.5 tok/s), esperando...")
+    print(f"\n  Generando respuesta ({model})...\n", flush=True)
     t0 = time.time()
-    print(f"\n  Respuesta:\n", end="", flush=True)
-    for token in ask_ollama_stream(prompt):
+    for token in ask_ollama_stream(prompt, model):
         print(token, end="", flush=True)
     t1 = time.time()
     print(f"\n\n  Tiempo: {t1-t0:.0f}s")
 
-    print(f"\n  Fuentes ({len(docs)}):")
+
+def show_sources(docs, title="Fuentes"):
+    print(f"\n  {title} ({len(docs)} chunks):")
     for i, doc in enumerate(docs):
         meta = doc.metadata
         src = meta.get("source_file", meta.get("source", "?"))
         pages = meta.get("pages", "?")
         cat = meta.get("category", "?")
         print(f"  [{i+1}] {src} (págs: {pages}, categoría: {cat})")
+        print(f"      {doc.page_content[:120]}...")
 
 
-def run_cli():
-    print(f"  Loading vectorstore...", end=" ", flush=True)
+def strip_prefix(text):
+    lower = text.lower().strip()
+    for prefix in SKIP_PREFIXES:
+        if lower.startswith(prefix):
+            cutoff = text[len(prefix):]
+            # si el prefijo va seguido de dos puntos o salto, limpiar
+            return cutoff.lstrip(":,. -\n\r")
+    return text
+
+
+def run_cli(model=OLLAMA_MODEL):
+    print(f"  Cargando vectorstore...", end=" ", flush=True)
     t0 = time.time()
     vectordb = load_vectorstore()
     retriever = vectordb.as_retriever(search_kwargs={"k": 5})
-    print(f"done ({time.time()-t0:.1f}s)")
+    print(f"hecho ({time.time()-t0:.1f}s)")
 
     print("\n" + "=" * 60)
     print("  RAG - Seguridad Pública México")
     print("  Escribe 'salir' para terminar")
-    print("  (qwen2.5:7b en CPU ~0.5 tok/s)")
+    print(f"  Modelo: {model} (CPU ~0.5 tok/s)")
+    print("  Comandos: /fuentes  /modelo NOMBRE  /salir")
     print("=" * 60)
 
     last_docs = None
@@ -117,44 +138,80 @@ def run_cli():
         try:
             question = input("\n> ").strip()
         except (EOFError, KeyboardInterrupt):
-            print()
+            print("\n  Saliendo...")
             break
 
         if not question:
             continue
-        if question.lower() in ("salir", "exit", "quit"):
+        if question.lower() in ("salir", "exit", "quit", "/salir"):
             break
-        if question.lower() == "fuentes" and last_docs:
-            print("\n  Fuentes:")
-            for i, doc in enumerate(last_docs):
-                meta = doc.metadata
-                src = meta.get("source_file", meta.get("source", "?"))
-                pages = meta.get("pages", "?")
-                cat = meta.get("category", "?")
-                print(f"  [{i+1}] {src} (págs: {pages}, categoría: {cat})")
-                print(f"      {doc.page_content[:100]}...")
+
+        # comandos especiales
+        if question.lower() == "/fuentes":
+            if last_docs:
+                show_sources(last_docs)
+            else:
+                print("  No hay consulta previa.")
             continue
-        if question.lower() == "fuentes":
-            print("  No hay resultados previos.")
+        if question.lower().startswith("/modelo"):
+            parts = question.split(maxsplit=1)
+            if len(parts) > 1:
+                model = parts[1].strip()
+                print(f"  Modelo cambiado a: {model}")
+            else:
+                print(f"  Modelo actual: {model}")
             continue
 
+        # recuperar chunks
+        print(f"  Buscando chunks relevantes...", end=" ", flush=True)
         docs = retriever.invoke(question)
         last_docs = docs
+        print(f"({len(docs)} chunks encontrados)")
+        show_sources(docs, "Contexto recuperado")
+
+        # generar respuesta
         context = format_docs(docs)
         prompt = PROMPT_TEMPLATE.format(context=context, question=question)
 
-        print(f"\n  qwen2.5:7b en CPU (~0.5 tok/s), esperando...")
-        print(f"  Respuesta:\n", end="", flush=True)
-        for token in ask_ollama_stream(prompt):
-            print(token, end="", flush=True)
-        print(f"\n  ---")
-        print(f"  Fuentes: {len(docs)} chunks")
+        print(f"\n  Generando respuesta ({model})...\n", flush=True)
+        try:
+            accumulated = ""
+            for token in ask_ollama_stream(prompt, model):
+                accumulated += token
+                print(token, end="", flush=True)
+            # limpiar prefijo si aparece
+            cleaned = strip_prefix(accumulated)
+            if cleaned != accumulated:
+                # reimprimir sin prefijo
+                print(f"\r  {cleaned}", end="", flush=True)
+        except KeyboardInterrupt:
+            print("\n  Generación interrumpida.")
+        except Exception as e:
+            print(f"\n  Error: {e}")
+
+        print(f"\n\n  ---")
 
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    if args and args[0] not in ("-i", "--interactive"):
+    model = OLLAMA_MODEL
+
+    # parsear --model delante
+    filtered = []
+    i = 0
+    while i < len(args):
+        if args[i] in ("--model", "-m") and i + 1 < len(args):
+            model = args[i + 1]
+            i += 2
+        elif args[i] in ("-i", "--interactive"):
+            i += 1
+        else:
+            filtered.append(args[i])
+            i += 1
+    args = filtered
+
+    if args:
         query = " ".join(args)
-        query_once(query)
+        query_once(query, model=model)
     else:
-        run_cli()
+        run_cli(model=model)

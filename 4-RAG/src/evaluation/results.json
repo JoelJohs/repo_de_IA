@@ -1,0 +1,387 @@
+{
+  "total_tests": 20,
+  "avg_precision_at_5": 0.26,
+  "avg_recall_at_5": 0.53,
+  "avg_category_match": 0.7,
+  "avg_retrieval_time": 0.1,
+  "max_retrieval_time": 1.25,
+  "results": [
+    {
+      "question": "¿Cuántos homicidios se registraron en México en 2024 según INEGI?",
+      "retrieval_time": 1.25,
+      "precision": 0.0,
+      "recall": 0.0,
+      "category_match": 1.0,
+      "retrieved_categories": [
+        "extorsion",
+        "homicidios"
+      ],
+      "retrieved_sources": [
+        "extorsion/extorsion_integralia_2025.pdf",
+        "homicidios/homicidios_mucd_2025.pdf",
+        "homicidios/homicidios_mucd_2025.pdf",
+        "homicidios/homicidios_mucd_2025.pdf",
+        "homicidios/homicidios_mucd_2025.pdf"
+      ]
+    },
+    {
+      "question": "¿Qué porcentaje representa la cifra negra en México según ENVIPE 2024?",
+      "retrieval_time": 0.04,
+      "precision": 0.0,
+      "recall": 0.0,
+      "category_match": 0.0,
+      "retrieved_categories": [
+        "impacto_socioeconomico",
+        "extorsion",
+        "militarizacion",
+        "subregistro"
+      ],
+      "retrieved_sources": [
+        "extorsion/extorsion_integralia_2025.pdf",
+        "impacto_socioeconomico/impacto_socioeconomico_m_xico_eval_a_2024.pdf",
+        "impacto_socioeconomico/impacto_socioeconomico_m_xico_eval_a_2024.pdf",
+        "subregistro/subregistro_m_xico_eval_a_2024.pdf",
+        "militarizacion/militarizacion_fundaci_n_carolina_2023.pdf"
+      ]
+    },
+    {
+      "question": "¿Qué estados tienen las tasas más altas de homicidios en México?",
+      "retrieval_time": 0.04,
+      "precision": "N/A",
+      "recall": "N/A",
+      "category_match": 1.0,
+      "retrieved_categories": [
+        "militarizacion",
+        "homicidios"
+      ],
+      "retrieved_sources": [
+        "militarizacion/militarizacion_fundaci_n_carolina_2023.pdf",
+        "homicidios/homicidios_mucd_2025.pdf",
+        "homicidios/homicidios_mucd_2025.pdf",
+        "homicidios/homicidios_mucd_2025.pdf",
+        "homicidios/homicidios_mucd_2025.pdf"
+      ]
+    },
+    {
+      "question": "¿Cuál es el impacto económico de la violencia en México según el IEP?",
+      "retrieval_time": 0.03,
+      "precision": 0.2,
+      "recall": 1.0,
+      "category_match": 1.0,
+      "retrieved_categories": [
+        "impacto_socioeconomico",
+        "militarizacion",
+        "desplazamiento_forzado",
+        "tierra_caliente"
+      ],
+      "retrieved_sources": [
+        "militarizacion/militarizacion_m_xico_unido_contra_la_delincuencia_2024.pdf",
+        "tierra_caliente/tierra_caliente_unam_2024.pdf",
+        "impacto_socioeconomico/impacto_socioeconomico_m_xico_eval_a_2024.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "impacto_socioeconomico/impacto_socioeconomico_iep_2024.pdf"
+      ]
+    },
+    {
+      "question": "¿Qué dice el informe de la SCJN sobre desplazamiento forzado interno?",
+      "retrieval_time": 0.04,
+      "precision": 0.8,
+      "recall": 1.0,
+      "category_match": 1.0,
+      "retrieved_categories": [
+        "subregistro",
+        "desplazamiento_forzado"
+      ],
+      "retrieved_sources": [
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "subregistro/subregistro_m_xico_eval_a_2024.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf"
+      ]
+    },
+    {
+      "question": "¿Cómo afecta la militarización a la seguridad pública según MUCD?",
+      "retrieval_time": 0.04,
+      "precision": 0.4,
+      "recall": 1.0,
+      "category_match": 1.0,
+      "retrieved_categories": [
+        "militarizacion"
+      ],
+      "retrieved_sources": [
+        "militarizacion/militarizacion_fundaci_n_carolina_2023.pdf",
+        "militarizacion/militarizacion_fundaci_n_carolina_2023.pdf",
+        "militarizacion/militarizacion_fundaci_n_carolina_2023.pdf",
+        "militarizacion/militarizacion_m_xico_unido_contra_la_delincuencia_2024.pdf",
+        "militarizacion/militarizacion_m_xico_unido_contra_la_delincuencia_2024.pdf"
+      ]
+    },
+    {
+      "question": "¿Qué es la Ley General para la Prevención Social de la Violencia y la Delincuencia?",
+      "retrieval_time": 0.04,
+      "precision": 0.6,
+      "recall": 1.0,
+      "category_match": 1.0,
+      "retrieved_categories": [
+        "subregistro",
+        "militarizacion",
+        "prevencion_social"
+      ],
+      "retrieved_sources": [
+        "prevencion_social/prevencion_social_c_mara_de_diputados_2021.pdf",
+        "prevencion_social/prevencion_social_c_mara_de_diputados_2021.pdf",
+        "prevencion_social/prevencion_social_c_mara_de_diputados_2021.pdf",
+        "subregistro/subregistro_m_xico_eval_a_2024.pdf",
+        "militarizacion/militarizacion_fundaci_n_carolina_2023.pdf"
+      ]
+    },
+    {
+      "question": "¿Cuáles son los principales tipos de extorsión en México según el ONC?",
+      "retrieval_time": 0.04,
+      "precision": 0.2,
+      "recall": 1.0,
+      "category_match": 1.0,
+      "retrieved_categories": [
+        "militarizacion",
+        "desplazamiento_forzado",
+        "extorsion",
+        "subregistro",
+        "impacto_socioeconomico"
+      ],
+      "retrieved_sources": [
+        "extorsion/extorsion_observatorio_nacional_ciudadano_2024.pdf",
+        "militarizacion/militarizacion_m_xico_unido_contra_la_delincuencia_2024.pdf",
+        "impacto_socioeconomico/impacto_socioeconomico_m_xico_eval_a_2024.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "subregistro/subregistro_m_xico_eval_a_2024.pdf"
+      ]
+    },
+    {
+      "question": "¿Qué relación hay entre violencia y pobreza en Tierra Caliente según el ICG?",
+      "retrieval_time": 0.04,
+      "precision": 0.0,
+      "recall": 0.0,
+      "category_match": 0.0,
+      "retrieved_categories": [
+        "militarizacion",
+        "impacto_socioeconomico",
+        "desplazamiento_forzado"
+      ],
+      "retrieved_sources": [
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "impacto_socioeconomico/impacto_socioeconomico_m_xico_eval_a_2024.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "militarizacion/militarizacion_fundaci_n_carolina_2023.pdf"
+      ]
+    },
+    {
+      "question": "¿Cuántas víctimas de homicidio se registraron en el Atlas de MUCD 2024?",
+      "retrieval_time": 0.03,
+      "precision": 1.0,
+      "recall": 1.0,
+      "category_match": 1.0,
+      "retrieved_categories": [
+        "homicidios"
+      ],
+      "retrieved_sources": [
+        "homicidios/homicidios_mucd_2025.pdf",
+        "homicidios/homicidios_mucd_2025.pdf",
+        "homicidios/homicidios_mucd_2025.pdf",
+        "homicidios/homicidios_mucd_2025.pdf",
+        "homicidios/homicidios_mucd_2025.pdf"
+      ]
+    },
+    {
+      "question": "¿Qué dice el Banco Mundial sobre la pobreza y la violencia en México?",
+      "retrieval_time": 0.04,
+      "precision": 0.0,
+      "recall": 0.0,
+      "category_match": 1.0,
+      "retrieved_categories": [
+        "subregistro",
+        "militarizacion",
+        "impacto_socioeconomico"
+      ],
+      "retrieved_sources": [
+        "militarizacion/militarizacion_m_xico_unido_contra_la_delincuencia_2024.pdf",
+        "subregistro/subregistro_m_xico_eval_a_2024.pdf",
+        "impacto_socioeconomico/impacto_socioeconomico_m_xico_eval_a_2024.pdf",
+        "impacto_socioeconomico/impacto_socioeconomico_m_xico_eval_a_2024.pdf",
+        "militarizacion/militarizacion_fundaci_n_carolina_2023.pdf"
+      ]
+    },
+    {
+      "question": "¿Cuál es la situación de derechos humanos en México según el Departamento de Estado de EE.UU.?",
+      "retrieval_time": 0.04,
+      "precision": 0.0,
+      "recall": 0.0,
+      "category_match": 0.0,
+      "retrieved_categories": [
+        "desplazamiento_forzado"
+      ],
+      "retrieved_sources": [
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_centro_prodh_2023.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_centro_prodh_2023.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf"
+      ]
+    },
+    {
+      "question": "¿Qué impacto humanitario reporta el CICR en México?",
+      "retrieval_time": 0.04,
+      "precision": 0.0,
+      "recall": 0.0,
+      "category_match": 0.0,
+      "retrieved_categories": [
+        "homicidios",
+        "violencia_rural",
+        "desplazamiento_forzado",
+        "extorsion"
+      ],
+      "retrieved_sources": [
+        "homicidios/homicidios_mucd_2025.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "extorsion/extorsion_integralia_2025.pdf",
+        "violencia_rural/violencia_rural_noria_research_2023.pdf"
+      ]
+    },
+    {
+      "question": "¿Qué es el registro de víctimas según México Evalúa?",
+      "retrieval_time": 0.03,
+      "precision": 0.4,
+      "recall": 1.0,
+      "category_match": 1.0,
+      "retrieved_categories": [
+        "homicidios",
+        "registro_victimas",
+        "desplazamiento_forzado",
+        "extorsion"
+      ],
+      "retrieved_sources": [
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "registro_victimas/registro_victimas_m_xico_eval_a_2023.pdf",
+        "homicidios/homicidios_mucd_2025.pdf",
+        "extorsion/extorsion_observatorio_nacional_ciudadano_2024.pdf",
+        "registro_victimas/registro_victimas_m_xico_eval_a_2023.pdf"
+      ]
+    },
+    {
+      "question": "¿Qué es el subregistro de delitos y por qué es importante?",
+      "retrieval_time": 0.03,
+      "precision": 0.2,
+      "recall": 1.0,
+      "category_match": 1.0,
+      "retrieved_categories": [
+        "subregistro",
+        "extorsion",
+        "registro_victimas",
+        "cifra_negra"
+      ],
+      "retrieved_sources": [
+        "registro_victimas/registro_victimas_m_xico_eval_a_2023.pdf",
+        "extorsion/extorsion_observatorio_nacional_ciudadano_2024.pdf",
+        "subregistro/subregistro_m_xico_eval_a_2024.pdf",
+        "registro_victimas/registro_victimas_m_xico_eval_a_2023.pdf",
+        "cifra_negra/cifra_negra_inegi_2024.pdf"
+      ]
+    },
+    {
+      "question": "¿Qué relación hay entre cultivos ilícitos y programas sociales según Noria Research?",
+      "retrieval_time": 0.04,
+      "precision": 0.2,
+      "recall": 1.0,
+      "category_match": 1.0,
+      "retrieved_categories": [
+        "militarizacion",
+        "violencia_rural",
+        "desplazamiento_forzado"
+      ],
+      "retrieved_sources": [
+        "militarizacion/militarizacion_m_xico_unido_contra_la_delincuencia_2024.pdf",
+        "violencia_rural/violencia_rural_noria_research_2023.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_centro_prodh_2023.pdf"
+      ]
+    },
+    {
+      "question": "¿Qué dice la ENSU sobre percepción de seguridad en zonas urbanas?",
+      "retrieval_time": 0.04,
+      "precision": 0.0,
+      "recall": 0.0,
+      "category_match": 0.0,
+      "retrieved_categories": [
+        "impacto_socioeconomico",
+        "desplazamiento_forzado",
+        "extorsion"
+      ],
+      "retrieved_sources": [
+        "impacto_socioeconomico/impacto_socioeconomico_m_xico_eval_a_2024.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_centro_prodh_2023.pdf",
+        "extorsion/extorsion_integralia_2025.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf"
+      ]
+    },
+    {
+      "question": "¿Cuál es el balance de seguridad de la gestión 2018-2024 según México Evalúa?",
+      "retrieval_time": 0.04,
+      "precision": 1.0,
+      "recall": 1.0,
+      "category_match": 1.0,
+      "retrieved_categories": [
+        "impacto_socioeconomico"
+      ],
+      "retrieved_sources": [
+        "impacto_socioeconomico/impacto_socioeconomico_m_xico_eval_a_2024.pdf",
+        "impacto_socioeconomico/impacto_socioeconomico_m_xico_eval_a_2024.pdf",
+        "impacto_socioeconomico/impacto_socioeconomico_m_xico_eval_a_2024.pdf",
+        "impacto_socioeconomico/impacto_socioeconomico_m_xico_eval_a_2024.pdf",
+        "impacto_socioeconomico/impacto_socioeconomico_m_xico_eval_a_2024.pdf"
+      ]
+    },
+    {
+      "question": "¿Qué dice la UNODC sobre el crimen organizado en México?",
+      "retrieval_time": 0.03,
+      "precision": 0.0,
+      "recall": 0.0,
+      "category_match": 0.0,
+      "retrieved_categories": [
+        "militarizacion",
+        "extorsion",
+        "subregistro",
+        "impacto_socioeconomico",
+        "tierra_caliente"
+      ],
+      "retrieved_sources": [
+        "subregistro/subregistro_m_xico_eval_a_2024.pdf",
+        "tierra_caliente/tierra_caliente_unam_2024.pdf",
+        "impacto_socioeconomico/impacto_socioeconomico_m_xico_eval_a_2024.pdf",
+        "extorsion/extorsion_integralia_2025.pdf",
+        "militarizacion/militarizacion_fundaci_n_carolina_2023.pdf"
+      ]
+    },
+    {
+      "question": "¿Qué propone Integralia para combatir la extorsión?",
+      "retrieval_time": 0.04,
+      "precision": 0.0,
+      "recall": 0.0,
+      "category_match": 1.0,
+      "retrieved_categories": [
+        "extorsion",
+        "desplazamiento_forzado"
+      ],
+      "retrieved_sources": [
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "extorsion/extorsion_observatorio_nacional_ciudadano_2024.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_centro_prodh_2023.pdf",
+        "desplazamiento_forzado/desplazamiento_forzado_scjn_2023.pdf"
+      ]
+    }
+  ]
+}
