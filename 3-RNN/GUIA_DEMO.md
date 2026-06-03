@@ -24,33 +24,30 @@ distintas. Cada una toma entre 1 y 5 minutos. Tiempos medidos en CPU
 
 ## Setup (solo la primera vez, ~3 min)
 
+El venv esta **unificado en la raiz del repo** (`IA/.venv`) y ya tiene
+todas las dependencias de los 3 proyectos instaladas. Solo hay que
+activarlo.
+
 ```bash
 cd /home/jojo/develop/academic/IA/3-RNN
 
-# 1) Fijar Python del proyecto (3.11.9 ya instalado via pyenv)
-pyenv local 3.11.9
+# 1) El venv unificado vive en la raiz del repo
+cd ../..
+source .venv/bin/activate.fish
+
+# 2) Verificar
 python --version
 # -> Python 3.11.9
-
-# 2) Crear y activar entorno virtual
-python -m venv .venv
-source .venv/bin/activate
-python --version
-# -> Python 3.11.9 (ahora apunta a .venv/bin/python)
-
-# 3) Instalar dependencias
-pip install --upgrade pip
-pip install -r requirements.txt
-
-# 4) Verificar
 python -c "import tensorflow as tf; print('TF', tf.__version__)"
 # -> TF 2.16.1
 ```
 
 **Que decir mientras se hace esto:**
+
 - "El sistema tiene Python 3.14 pero TensorFlow 2.16 no lo soporta
-  todavia, asi que fijamos 3.11.9 con pyenv local a este proyecto."
-- "El venv aísla las dependencias — no toca el Python del sistema."
+  todavia, asi que fijamos 3.11.9 con pyenv local al repo."
+- "El venv unificado aísla las dependencias — no toca el Python del
+  sistema. Los 3 proyectos comparten el mismo venv."
 
 ---
 
@@ -64,7 +61,9 @@ siguientes los reusan.
 # Paso 1: muestreo (de 466 MB a 70 KB de funciones limpias)
 python src/sample_clean.py
 ```
+
 **Salida esperada** (ultimas lineas):
+
 ```
 Reading first 20,000,000 bytes of dataset/funciones.c ...
 Loaded 19,996,114 chars.
@@ -82,7 +81,9 @@ filtros ASCII/llaves/main. Nos quedamos con las 150 que mejor
 # Paso 2: preprocesamiento (vocabulario + ventanas)
 python src/preprocess.py
 ```
+
 **Salida esperada:**
+
 ```
 vocab_size=94 | corpus_chars=69,874 | num_windows=69,842
 X.shape=(69842, 32) Y.shape=(69842, 32) dtype=int64
@@ -98,7 +99,9 @@ siguiente caracter en cada posicion)."
 # Paso 3: entrenamiento (80 epocas, ~5 min)
 python src/train.py --epochs 80 --max-windows 20000
 ```
+
 **Salida esperada** (resumen):
+
 ```
 X=(20000, 32) Y=(20000, 32) | vocab=94 | block_size=32
 Model: "sequential"
@@ -119,6 +122,7 @@ Saved model to models/rnn_v1.keras
 ```
 
 **Que decir:**
+
 - "Embedding 94x48 + SimpleRNN 64 + TimeDistributed Dense 94 = 17 854
   parámetros, 70 KB total."
 - "Loss inicial ~3.07 (mejor que azar=4.54), final ~1.06. 5 minutos
@@ -135,11 +139,13 @@ python src/predict.py --prompt "int sum" --max-new 25 --temperature 0.4 --seed 4
 ```
 
 **Salida esperada:**
+
 ```
 int sum[mid] < nums[0] == 0)
 ```
 
 **Probar con otros prompts** (cada uno tarda ~1 s):
+
 ```bash
 python src/predict.py --prompt "void print" --max-new 25 --temperature 0.4
 python src/predict.py --prompt "for (int"   --max-new 25 --temperature 0.4
@@ -147,12 +153,14 @@ python src/predict.py --prompt "if (a"      --max-new 20 --temperature 0.4
 ```
 
 **Que decir:**
+
 - "El prompt es lo que el usuario escribio hasta el cursor. El
   modelo genera los siguientes N chars autoregresivamente."
 - "Temperatura 0.4 es relativamente determinista — mas baja
   repite patrones, mas alta mete mas variedad."
 
 **Si querés mostrar el efecto de la temperatura:**
+
 ```bash
 for t in 0.0 0.4 0.8 1.2; do
   echo "--- T=$t ---"
@@ -168,11 +176,13 @@ Muestra el modelo expuesto como servicio HTTP. Util para impresionar
 con `curl` o Postman.
 
 **Terminal A** (arrancar el server):
+
 ```bash
 uvicorn src.api:app --host 127.0.0.1 --port 8000
 ```
 
 **Salida esperada (en la terminal A):**
+
 ```
 INFO:     Started server process
 INFO:     Waiting for application startup.
@@ -181,6 +191,7 @@ INFO:     Uvicorn running on http://127.0.0.1:8000
 ```
 
 **Terminal B** (probar el server):
+
 ```bash
 # Health check
 curl http://127.0.0.1:8000/health
@@ -200,6 +211,7 @@ curl -X POST http://127.0.0.1:8000/suggest \
 ```
 
 **Que decir:**
+
 - "El server arranca en ~5 s (carga el modelo en memoria)."
 - "El modelo es un singleton: se carga una vez y se reusa por
   request."
@@ -241,11 +253,13 @@ VS Code abre la carpeta. En la barra inferior aparece
 
 **Resultado esperado:** el modelo inserta la continuacion
 directamente en el editor, por ejemplo:
+
 ```c
 int sum[mid] < nums[0] == 0)
 ```
 
 **Probar con mas prompts** (cualquier linea nueva, Ctrl+Shift+Space):
+
 ```c
 void print
 for (int
@@ -268,6 +282,7 @@ return
    Ctrl+Shift+Space in a C file."
 
 **Que decir:**
+
 - "La extension hace `spawn` del subproceso Python al activarse. El
   modelo se carga una vez y se queda en memoria."
 - "El primer Ctrl+Shift+Space tarda ~10 s por el warmup de TF; los
@@ -307,6 +322,7 @@ node vscode-extension/test_e2e.js
 ```
 
 **Salida esperada:**
+
 ```
 Spawning: python /home/jojo/develop/academic/IA/3-RNN/src/server_stdio.py
 /.../models/rnn_v1.keras
@@ -327,6 +343,7 @@ Spawning: python /home/jojo/develop/academic/IA/3-RNN/src/server_stdio.py
 ```
 
 **Que decir:**
+
 - "Este test replica exactamente lo que hace `extension.js`
   internamente: spawn, stdin/stdout, JSON-line, request correlativo
   por id."
@@ -337,13 +354,13 @@ Spawning: python /home/jojo/develop/academic/IA/3-RNN/src/server_stdio.py
 
 ## Resumen rapido: que demo mostrar cuando
 
-| Situacion | Demo | Tiempo |
-|---|---|---|
-| "Mostrame algo rapido" | Demo 1 (CLI) | 1 min |
-| "Quiero ver una API" | Demo 2 (FastAPI + curl) | 2 min |
-| "Quiero ver la integracion con editor" | Demo 3 (VS Code F5) | 5 min |
-| "No tengo VS Code a mano" | Demo 4 (test_e2e.js) | 1 min |
-| "Mostrame todo" | Demo 1 → 2 → 3 → 4 | 10 min total |
+| Situacion                              | Demo                    | Tiempo       |
+| -------------------------------------- | ----------------------- | ------------ |
+| "Mostrame algo rapido"                 | Demo 1 (CLI)            | 1 min        |
+| "Quiero ver una API"                   | Demo 2 (FastAPI + curl) | 2 min        |
+| "Quiero ver la integracion con editor" | Demo 3 (VS Code F5)     | 5 min        |
+| "No tengo VS Code a mano"              | Demo 4 (test_e2e.js)    | 1 min        |
+| "Mostrame todo"                        | Demo 1 → 2 → 3 → 4      | 10 min total |
 
 ---
 
@@ -351,11 +368,12 @@ Spawning: python /home/jojo/develop/academic/IA/3-RNN/src/server_stdio.py
 
 ### 1. `python: command not found` o version incorrecta
 
-**Causa**: el venv no se activo o `pyenv` no esta en el PATH.
+**Causa**: el venv unificado no se activo o `pyenv` no esta en el PATH.
 **Solucion**:
+
 ```bash
-cd /home/jojo/develop/academic/IA/3-RNN
-source .venv/bin/activate
+cd /home/jojo/develop/academic/IA
+source .venv/bin/activate.fish
 python --version    # debe decir 3.11.9
 ```
 
@@ -363,14 +381,19 @@ python --version    # debe decir 3.11.9
 
 **Causa**: el venv esta activo pero las dependencias no se instalaron.
 **Solucion**:
+
 ```bash
-pip install -r requirements.txt
+cd /home/jojo/develop/academic/IA
+pip install -r 1-game/requirements.txt
+pip install -r 2-CNN/requirements.txt
+pip install -r 3-RNN/requirements.txt
 ```
 
 ### 3. `OSError: [Errno 98] Address already in use` (FastAPI)
 
 **Causa**: el puerto 8000 esta ocupado por otra app.
 **Solucion**: usar otro puerto:
+
 ```bash
 uvicorn src.api:app --port 8001
 ```
@@ -380,13 +403,15 @@ uvicorn src.api:app --port 8001
 **Causa**: VS Code no encuentra `python` o el path al script.
 **Solucion**: en la Extension Development Host, abrir
 `Ctrl+Shift+P` → "Preferences: Open User Settings (JSON)" y agregar:
+
 ```json
 {
-  "rnnC.pythonPath": "/home/jojo/develop/academic/IA/3-RNN/.venv/bin/python",
+  "rnnC.pythonPath": "/home/jojo/develop/academic/IA/.venv/bin/python",
   "rnnC.serverScript": "/home/jojo/develop/academic/IA/3-RNN/src/server_stdio.py",
   "rnnC.modelPath": "/home/jojo/develop/academic/IA/3-RNN/models/rnn_v1.keras"
 }
 ```
+
 (Rutas absolutas, no relativas.)
 
 ### 5. El primer Ctrl+Shift+Space tarda 10 segundos y los siguientes son instantaneos
@@ -395,6 +420,7 @@ uvicorn src.api:app --port 8001
 invocacion compila el grafo y mueve tensores. Las siguientes
 reutilizan el modelo ya cargado. Si querés evitarlo, podés
 pre-calentar el server manualmente:
+
 ```bash
 python -c "from src.predict import RNNModel; from pathlib import Path; RNNModel.load(Path('models/rnn_v1.keras'))"
 ```
@@ -413,9 +439,8 @@ pkill -9 -f "server_stdio"
 # (Opcional) borrar artefactos para liberar espacio
 rm -rf dataset/processed models/rnn_v1.keras models/rnn_v1.meta.json
 
-# (Opcional) borrar el venv
-deactivate
-rm -rf .venv
+# El venv unificado vive en IA/.venv — para borrarlo hay que ir a la raiz:
+# cd ../.. && rm -rf .venv
 ```
 
 El dataset `dataset/sample/funciones.c` (~70 KB) puede quedar —

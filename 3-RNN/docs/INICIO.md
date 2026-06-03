@@ -1,8 +1,9 @@
 # Guia de inicio rapido
 
 ```bash
-cd 3-RNN
-source .venv/bin/activate     # ya creado con pyenv 3.11.9
+# El venv esta unificado en la raiz del repo (IA/.venv)
+cd ../..
+source .venv/bin/activate.fish
 
 # (re)generar todo desde cero
 python src/sample_clean.py
@@ -80,7 +81,7 @@ code --install-extension rnn-c-autocomplete-0.1.0.vsix
 
 | Problema                              | Solucion                                                                                                    |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `ModuleNotFoundError: tensorflow`     | Activa el venv: `source .venv/bin/activate`                                                                 |
+| `ModuleNotFoundError: tensorflow`     | Activa el venv raiz: `cd ../.. && source .venv/bin/activate.fish`                                          |
 | `python: command not found`           | El venv no se cargo. Reactivar.                                                                             |
 | Perdida no baja                       | El corpus se reescribio. Volve a correr `python src/preprocess.py && python src/train.py`.                  |
 | La extension VS Code no conecta       | El path de `serverScript` o `pythonPath` en settings.json no es correcto. Ver `vscode-extension/README.md`. |

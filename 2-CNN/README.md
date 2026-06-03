@@ -71,12 +71,25 @@ Fragmentos clave (referencia):
 
 ## Uso rapido
 
-Instalar dependencias:
+El entorno virtual **esta unificado en la raiz del repo** (`IA/.venv`)
+y ya tiene todas las dependencias de los 3 proyectos instaladas.
+Para activarlo desde aca:
 
 ```
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+cd ../..
+source .venv/bin/activate.fish
+```
+
+Si el venv raiz aun no existe:
+
+```
+cd ../..
+pyenv local 3.11.9
+pyenv exec python -m venv .venv
+source .venv/bin/activate.fish
+pip install -r ../1-game/requirements.txt
+pip install -r 2-CNN/requirements.txt
+pip install -r ../3-RNN/requirements.txt
 ```
 
 ## Preparacion del dataset

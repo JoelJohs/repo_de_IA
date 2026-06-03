@@ -1,5 +1,8 @@
 # IA (materia) - .gitignore pensado para repos livianos
-# Enfoque: ignorar entornos, caches, datasets, modelos/pesos, checkpoints y archivos grandes generados.
+# Enfoque: ignorar entornos, caches, datasets, modelos/pesos, checkpoints, vectordb y archivos grandes generados.
+
+vectordb/
+chroma.sqlite3
 
 ############################
 # SO / IDE
@@ -50,6 +53,7 @@ ipython_config.py
 data/
 dataset/
 datasets/
+!datasets/*.py
 raw/
 processed/
 downloads/

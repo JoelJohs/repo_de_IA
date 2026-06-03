@@ -28,7 +28,6 @@ C, y exponerlo a un editor (VS Code) mediante un servidor local.
 ```text
 3-RNN/
 ├── .python-version              # pyenv 3.11.9
-├── .venv/                       # entorno virtual
 ├── dataset/
 │   ├── funciones.c              # corpus crudo de entrada (466 MB)
 │   ├── sample/                  # 150 funciones "limpias" (F1)
@@ -69,12 +68,13 @@ C, y exponerlo a un editor (VS Code) mediante un servidor local.
 ## Flujo end-to-end
 
 ```bash
-# 0) entorno (solo la primera vez)
-cd 3-RNN
-pyenv local 3.11.9
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+# 0) entorno (ya esta creado en la raiz del repo: IA/.venv)
+cd ../..
+source .venv/bin/activate.fish
+# Si hubiera que reinstalar las dependencias desde cero:
+# pip install -r 1-game/requirements.txt
+# pip install -r 2-CNN/requirements.txt
+# pip install -r 3-RNN/requirements.txt
 
 # 1) muestreo del corpus (de 466 MB a 70 KB de funciones limpias)
 python src/sample_clean.py

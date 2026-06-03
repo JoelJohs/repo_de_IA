@@ -20,31 +20,42 @@ recompilar TensorFlow o instalar nightly, fijamos **3.11.9** con `pyenv`.
 
 ## Setup recomendado (Arch Linux, lo que usa este proyecto)
 
+El venv esta **unificado en la raiz del repo** (`IA/.venv`) y ya tiene
+todas las dependencias de los 3 proyectos instaladas. Solo hay que
+activarlo:
+
 ```bash
 # pyenv ya esta instalado, y 3.11.9 ya descargado
-cd 3-RNN
-pyenv local 3.11.9           # crea .python-version
-python -m venv .venv
-source .venv/bin/activate
+cd ../../IA
+pyenv local 3.11.9           # solo la primera vez; crea .python-version en la raiz
+source .venv/bin/activate.fish
+
+# Si hubiera que reinstalar las dependencias desde cero:
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r 1-game/requirements.txt
+pip install -r 2-CNN/requirements.txt
+pip install -r 3-RNN/requirements.txt
+
 python -c "import tensorflow as tf; print('TF', tf.__version__)"
 # -> TF 2.16.1
 ```
+
+> Cada subproyecto ya no tiene su propio `.venv` ni su propio
+> `.python-version`. Todo se centraliza en `IA/`.
 
 ## Diagnostico basico
 
 ```bash
 python --version            # debe decir 3.11.9 (no 3.14)
-which python                # debe apuntar a .venv/bin/python
+which python                # debe apuntar a IA/.venv/bin/python
 python -c "import tensorflow as tf; print(tf.__version__)"
 ```
 
 ## Troubleshooting
 
-| Mensaje                                   | Causa                       | Solucion                                 |
-| ----------------------------------------- | --------------------------- | ---------------------------------------- |
-| `ModuleNotFoundError: tensorflow`         | El venv no esta activado    | `source .venv/bin/activate`              |
+| Mensaje                                   | Causa                       | Solucion                                            |
+| ----------------------------------------- | --------------------------- | --------------------------------------------------- |
+| `ModuleNotFoundError: tensorflow`         | El venv no esta activado    | `cd ../../IA && source .venv/bin/activate.fish`     |
 | `ImportError: numpy >= 2.0 ...`           | numpy 2.x rompe TF 2.16     | `pip install "numpy<2.0"`                |
 | `Could not find cuda drivers`             | Aviso informativo, no error | Normal: este proyecto corre en CPU       |
 | `TF-TRT Warning: Could not find TensorRT` | Aviso informativo           | Normal, no afecta el entrenamiento       |

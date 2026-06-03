@@ -50,6 +50,7 @@ function startServer() {
   }
   const py = pythonBin();
   const args = resolveServerArgs();
+  console.log(`[rnnC] spawning: ${py} ${args.join(" ")}`);
   serverProc = spawn(py, args, { stdio: ["pipe", "pipe", "pipe"] });
 
   serverProc.stdout.on("data", (chunk) => {

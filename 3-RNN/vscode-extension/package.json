@@ -42,18 +42,18 @@
       "properties": {
         "rnnC.pythonPath": {
           "type": "string",
-          "default": "python",
-          "description": "Python executable to spawn the stdio server with."
+          "default": "/home/jojo/develop/academic/IA/.venv/bin/python",
+          "description": "Python executable to spawn the stdio server with. Apunta al venv unificado en la raiz del repo (IA/.venv)."
         },
         "rnnC.serverScript": {
           "type": "string",
-          "default": "src/server_stdio.py",
-          "description": "Path (relative to project root or absolute) of server_stdio.py."
+          "default": "/home/jojo/develop/academic/IA/3-RNN/src/server_stdio.py",
+          "description": "Path (relative to project root or absolute) of server_stdio.py. Default absoluto al venv unificado del repo."
         },
         "rnnC.modelPath": {
           "type": "string",
-          "default": "models/rnn_v1.keras",
-          "description": "Optional model .keras path. If empty, the server uses its default."
+          "default": "/home/jojo/develop/academic/IA/3-RNN/models/rnn_v1.keras",
+          "description": "Optional model .keras path. Default absoluto al modelo entrenado. Si empty, el server usa su propio default."
         },
         "rnnC.maxNew": {
           "type": "integer",

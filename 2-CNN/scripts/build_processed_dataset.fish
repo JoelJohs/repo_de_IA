@@ -3,12 +3,13 @@
 set script_dir (dirname (realpath (status filename)))
 set project_root (dirname $script_dir)
 
-set python_bin "$project_root/.venv/bin/python"
+set repo_root (dirname $project_root)
+set python_bin "$repo_root/.venv/bin/python"
 set config_path "$project_root/config/default.yaml"
 
 if not test -x $python_bin
-    echo "No se encontro el venv en $python_bin"
-    echo "Crea el entorno y dependencias primero."
+    echo "No se encontro el venv raiz en $python_bin"
+    echo "El venv unificado esta en la raiz del repo (IA/.venv)."
     exit 1
 end
 

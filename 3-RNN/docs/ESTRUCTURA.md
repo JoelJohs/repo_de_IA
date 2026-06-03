@@ -2,8 +2,6 @@
 
 ```text
 3-RNN/
-├── .python-version              # pyenv 3.11.9 (fijado para este proyecto)
-├── .venv/                       # entorno virtual
 ├── dataset/
 │   ├── funciones.c              # corpus crudo (input, no se entrena)
 │   ├── sample/                  # 150 funciones seleccionadas (input del modelo)

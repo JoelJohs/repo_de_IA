@@ -1,0 +1,122 @@
+[
+  {
+    "question": "¿Cuántos homicidios se registraron en México en 2024 según INEGI?",
+    "expected_keywords": ["INEGI", "homicidio", "2024"],
+    "expected_categories": ["homicidios"],
+    "expected_sources": ["homicidios_inegi_2025.pdf"]
+  },
+  {
+    "question": "¿Qué porcentaje representa la cifra negra en México según ENVIPE 2024?",
+    "expected_keywords": ["cifra negra", "ENVIPE", "INEGI"],
+    "expected_categories": ["cifra_negra"],
+    "expected_sources": ["cifra_negra_inegi_2024.pdf"]
+  },
+  {
+    "question": "¿Qué estados tienen las tasas más altas de homicidios en México?",
+    "expected_keywords": ["homicidio", "tasa", "estado"],
+    "expected_categories": ["homicidios"],
+    "expected_sources": []
+  },
+  {
+    "question": "¿Cuál es el impacto económico de la violencia en México según el IEP?",
+    "expected_keywords": ["IEP", "Peace Index", "económico", "México"],
+    "expected_categories": ["impacto_socioeconomico"],
+    "expected_sources": ["impacto_socioeconomico_iep_2024.pdf"]
+  },
+  {
+    "question": "¿Qué dice el informe de la SCJN sobre desplazamiento forzado interno?",
+    "expected_keywords": ["SCJN", "desplazamiento", "interno"],
+    "expected_categories": ["desplazamiento_forzado"],
+    "expected_sources": ["desplazamiento_forzado_scjn_2023.pdf"]
+  },
+  {
+    "question": "¿Cómo afecta la militarización a la seguridad pública según MUCD?",
+    "expected_keywords": ["militarización", "MUCD", "seguridad"],
+    "expected_categories": ["militarizacion"],
+    "expected_sources": ["militarizacion_m_xico_unido_contra_la_delincuencia_2024.pdf"]
+  },
+  {
+    "question": "¿Qué es la Ley General para la Prevención Social de la Violencia y la Delincuencia?",
+    "expected_keywords": ["Ley General", "Prevención Social", "Violencia", "Delincuencia"],
+    "expected_categories": ["prevencion_social"],
+    "expected_sources": ["prevencion_social_c_mara_de_diputados_2021.pdf"]
+  },
+  {
+    "question": "¿Cuáles son los principales tipos de extorsión en México según el ONC?",
+    "expected_keywords": ["extorsión", "ONC", "modalidades"],
+    "expected_categories": ["extorsion"],
+    "expected_sources": ["extorsion_observatorio_nacional_ciudadano_2024.pdf"]
+  },
+  {
+    "question": "¿Qué relación hay entre violencia y pobreza en Tierra Caliente según el ICG?",
+    "expected_keywords": ["Tierra Caliente", "violencia", "Crisis Group"],
+    "expected_categories": ["tierra_caliente"],
+    "expected_sources": ["tierra_caliente_international_crisis_group_2024.pdf"]
+  },
+  {
+    "question": "¿Cuántas víctimas de homicidio se registraron en el Atlas de MUCD 2024?",
+    "expected_keywords": ["Atlas", "MUCD", "homicidio", "víctimas"],
+    "expected_categories": ["homicidios"],
+    "expected_sources": ["homicidios_mucd_2025.pdf"]
+  },
+  {
+    "question": "¿Qué dice el Banco Mundial sobre la pobreza y la violencia en México?",
+    "expected_keywords": ["World Bank", "pobreza", "México", "violencia"],
+    "expected_categories": ["impacto_socioeconomico"],
+    "expected_sources": ["impacto_socioeconomico_world_bank_2024.pdf"]
+  },
+  {
+    "question": "¿Cuál es la situación de derechos humanos en México según el Departamento de Estado de EE.UU.?",
+    "expected_keywords": ["Human Rights", "State Department", "México"],
+    "expected_categories": ["impacto_socioeconomico"],
+    "expected_sources": ["impacto_socioeconomico_u.s._state_department_2025.pdf"]
+  },
+  {
+    "question": "¿Qué impacto humanitario reporta el CICR en México?",
+    "expected_keywords": ["ICRC", "humanitario", "México"],
+    "expected_categories": ["impacto_socioeconomico"],
+    "expected_sources": ["impacto_socioeconomico_icrc_2024.pdf"]
+  },
+  {
+    "question": "¿Qué es el registro de víctimas según México Evalúa?",
+    "expected_keywords": ["registro", "víctimas", "México Evalúa"],
+    "expected_categories": ["registro_victimas"],
+    "expected_sources": ["registro_victimas_m_xico_eval_a_2023.pdf"]
+  },
+  {
+    "question": "¿Qué es el subregistro de delitos y por qué es importante?",
+    "expected_keywords": ["subregistro", "delitos", "México Evalúa"],
+    "expected_categories": ["subregistro"],
+    "expected_sources": ["subregistro_m_xico_eval_a_2024.pdf"]
+  },
+  {
+    "question": "¿Qué relación hay entre cultivos ilícitos y programas sociales según Noria Research?",
+    "expected_keywords": ["Sembrando Vida", "cultivos ilícitos", "Noria"],
+    "expected_categories": ["violencia_rural"],
+    "expected_sources": ["violencia_rural_noria_research_2023.pdf"]
+  },
+  {
+    "question": "¿Qué dice la ENSU sobre percepción de seguridad en zonas urbanas?",
+    "expected_keywords": ["ENSU", "INEGI", "percepción", "seguridad"],
+    "expected_categories": ["violencia_urbana"],
+    "expected_sources": ["violencia_urbana_inegi_2024.pdf"]
+  },
+  {
+    "question": "¿Cuál es el balance de seguridad de la gestión 2018-2024 según México Evalúa?",
+    "expected_keywords": ["balance", "seguridad", "México Evalúa", "2018", "2024"],
+    "expected_categories": ["impacto_socioeconomico"],
+    "expected_sources": ["impacto_socioeconomico_m_xico_eval_a_2024.pdf"]
+  },
+  {
+    "question": "¿Qué dice la UNODC sobre el crimen organizado en México?",
+    "expected_keywords": ["UNODC", "crimen organizado", "México"],
+    "expected_categories": ["crimen_organizado"],
+    "expected_sources": ["crimen_organizado_unodc_2024.pdf"]
+  },
+  {
+    "question": "¿Qué propone Integralia para combatir la extorsión?",
+    "expected_keywords": ["Integralia", "extorsión", "delitos"],
+    "expected_categories": ["extorsion"],
+    "expected_sources": ["extorsion_integralia_2025.pdf"]
+  }
+]

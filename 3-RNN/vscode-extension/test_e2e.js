@@ -1,12 +1,18 @@
-// E2E test: load extension.js, drive it through the same code path VS Code uses.
-// We mock vscode and intercept the `request()` flow by re-implementing the
-// stdin/stdout protocol against the spawned server.
+// E2E test: drive the same code path VS Code uses, re-implementing the
+// stdin/stdout protocol against the spawned server. The extension
+// (extension.js) uses vscode.workspace to resolve paths and get the
+// configuration, so it can't run headless. This test is the closest we
+// can get without a real VS Code instance.
+//
+// Por defecto usa el venv unificado en IA/.venv. Se puede override con:
+//   PYTHON_BIN=/otro/python node test_e2e.js
 
 const { spawn } = require("child_process");
 const path = require("path");
 
 const root = path.resolve(__dirname, "..");
-const pyBin = "python";
+const repoRoot = path.resolve(root, "..");
+const pyBin = process.env.PYTHON_BIN || path.join(repoRoot, ".venv", "bin", "python");
 const serverArgs = [
   path.join(root, "src", "server_stdio.py"),
   path.join(root, "models", "rnn_v1.keras"),

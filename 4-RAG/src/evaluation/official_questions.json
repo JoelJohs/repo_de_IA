@@ -1,0 +1,52 @@
+[
+  {
+    "id": "Q1",
+    "nivel": "extraccion",
+    "pregunta": "¿Cuáles son las tres entidades federativas con mayor índice de homicidios dolosos según los datos más recientes incluidos en el corpus?"
+  },
+  {
+    "id": "Q2",
+    "nivel": "extraccion",
+    "pregunta": "¿Qué organizaciones, cárteles o grupos delictivos se mencionan con mayor frecuencia operando en la región de Tierra Caliente?"
+  },
+  {
+    "id": "Q3",
+    "nivel": "extraccion",
+    "pregunta": "¿Cuáles son las cifras oficiales reportadas sobre el desplazamiento forzado interno a causa de la violencia durante el último sexenio documentado?"
+  },
+  {
+    "id": "Q4",
+    "nivel": "sintesis",
+    "pregunta": "Según los documentos, ¿cuáles son las principales causas socioeconómicas que los autores asocian directamente al incremento de la violencia urbana?"
+  },
+  {
+    "id": "Q5",
+    "nivel": "sintesis",
+    "pregunta": "Contrasta las estrategias de seguridad pública mencionadas en el corpus. ¿Qué diferencias de enfoque existen entre la militarización y las políticas de prevención social?"
+  },
+  {
+    "id": "Q6",
+    "nivel": "sintesis",
+    "pregunta": "¿Cómo ha evolucionado la tasa de delitos de extorsión (cobro de piso) a nivel nacional y qué sectores económicos se reportan como los más afectados?"
+  },
+  {
+    "id": "Q7",
+    "nivel": "sintesis",
+    "pregunta": "¿Existe alguna diferencia significativa documentada en los tipos de violencia que experimentan las zonas rurales en comparación con las zonas metropolitanas?"
+  },
+  {
+    "id": "Q8",
+    "nivel": "analisis",
+    "pregunta": "Con base en las posturas de las ONGs y las fuentes gubernamentales presentes en los textos, ¿cuáles son las principales contradicciones o discrepancias en el registro de víctimas?"
+  },
+  {
+    "id": "Q9",
+    "nivel": "analisis",
+    "pregunta": "¿Qué impacto específico tiene la violencia documentada sobre la tasa de deserción escolar en las zonas de alto conflicto?"
+  },
+  {
+    "id": "Q10",
+    "nivel": "analisis",
+    "pregunta": "A partir de las conclusiones de los autores en el corpus, ¿qué vacíos de información, subregistros o falta de datos fiables se identifican como el principal obstáculo para medir la violencia real en el país?"
+  }
+]
