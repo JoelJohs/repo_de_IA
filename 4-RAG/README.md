@@ -9,7 +9,7 @@ El corpus fue **curado por jojo** como parte del Proyecto 4 de IA. Contiene 23 d
 El sistema distingue **tres niveles de atribución**:
 
 1. **El curador** (jojo): reunió los documentos, no produce análisis.
-2. **Los autores institucionales** (16): cada documento tiene su立场 editorial.
+2. **Los autores institucionales** (16): cada documento tiene su postura editorial.
 3. **El corpus en su conjunto**: es plural, no tiene postura única.
 
 Para más detalle, ver [`corpus/processed/MANIFIESTO.md`](corpus/processed/MANIFIESTO.md) y [`corpus/processed/AUTORES.md`](corpus/processed/AUTORES.md).
