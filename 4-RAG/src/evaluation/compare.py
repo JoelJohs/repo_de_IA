@@ -13,6 +13,13 @@ from pathlib import Path
 from datetime import datetime
 
 BASE_DIR = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(BASE_DIR / "src"))
+from _format import (
+    format_docs_with_attribution,
+    load_manifesto,
+    build_rag_prompt,
+)
+
 RESULTS_DIR = BASE_DIR / "results"
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
@@ -45,7 +52,7 @@ def load_vectorstore():
 
 def retrieve_context(retriever, question, k=5):
     docs = retriever.invoke(question)
-    context = "\n\n".join(d.page_content for d in docs)
+    context = format_docs_with_attribution(docs)
     sources = [d.metadata.get("source_file", "?") for d in docs]
     return context, sources
 
@@ -72,7 +79,10 @@ def ask_ollama(prompt, stream=False):
 
 
 def prepare_prompt_official(question, context):
+    manifesto = load_manifesto()
+    manifesto_section = f"{manifesto}\n\n" if manifesto else ""
     return (
+        f"{manifesto_section}"
         "Eres un asistente experto en seguridad pública en México. "
         "Responde basándote ÚNICAMENTE en el contexto proporcionado. "
         "Si el contexto no contiene la información, indícalo claramente.\n\n"
@@ -109,13 +119,7 @@ def load_lora_adapter():
 
 
 def answer_with_lora(question, context, tokenizer, model):
-    prompt = (
-        "<|system|>\nEres un asistente experto en seguridad pública en México. "
-        "Responde SOLO con la información del contexto proporcionado.</s>\n"
-        f"<|user|>\nContexto:\n{context}\n\n"
-        f"Pregunta: {question}</s>\n"
-        "<|assistant|>"
-    )
+    prompt = build_rag_prompt(context, question, include_manifesto=True)
     import torch
     inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=1024)
     with torch.no_grad():

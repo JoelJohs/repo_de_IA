@@ -29,6 +29,9 @@ from peft import (
 )
 
 BASE_DIR = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(BASE_DIR / "src"))
+from _format import build_training_prompt
+
 DEFAULT_MODEL = "Qwen/Qwen2.5-0.5B-Instruct"
 OUTPUT_DIR = BASE_DIR / "src" / "finetuning" / "lora_adapter"
 DEFAULT_DATASET = BASE_DIR / "datasets" / "finetuning.jsonl"
@@ -47,8 +50,7 @@ def load_dataset_jsonl(filepath):
 def format_example(record):
     instruction = record.get("instruction", "")
     output = record.get("response") or record.get("output", "")
-    text = f"<|system|>\nEres un asistente experto en seguridad pública en México. Responde de manera útil, precisa y basada en fuentes.</s>\n<|user|>\n{instruction}</s>\n<|assistant|>\n{output}</s>"
-    return text
+    return build_training_prompt(instruction, output)
 
 
 def main():

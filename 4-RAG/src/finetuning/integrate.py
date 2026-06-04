@@ -15,20 +15,18 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
 
 BASE_DIR = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(BASE_DIR / "src"))
+from _format import (
+    format_docs_with_attribution,
+    load_manifesto,
+    build_rag_prompt,
+)
+
 ADAPTER_DIR = BASE_DIR / "src" / "finetuning" / "lora_adapter"
 BASE_MODEL = "Qwen/Qwen2.5-0.5B-Instruct"
 
 OLLAMA_MODEL = "qwen2.5:7b-instruct"
 OLLAMA_URL = "http://localhost:11434/api/generate"
-
-PROMPT_TEMPLATE = """<|system|>
-Eres un asistente experto en seguridad pública en México. Responde SOLO con la información del contexto proporcionado.</s>
-<|user|>
-Contexto:
-{context}
-
-Pregunta: {question}</s>
-<|assistant|>"""
 
 
 class LoRARAG:
@@ -120,11 +118,14 @@ def main():
     def query(question, k=args.k):
         retriever = vectordb.as_retriever(search_kwargs={"k": k})
         docs = retriever.invoke(question)
-        context = "\n\n".join(d.page_content for d in docs)
+        context = format_docs_with_attribution(docs)
 
         if args.use_ollama:
             import requests
+            manifesto = load_manifesto()
+            manifesto_section = f"{manifesto}\n\n" if manifesto else ""
             prompt = (
+                f"{manifesto_section}"
                 "Eres un asistente experto en seguridad pública en México. "
                 "Responde ÚNICAMENTE basado en el contexto.\n\n"
                 f"Contexto:\n{context}\n\n"
@@ -147,7 +148,7 @@ def main():
                     print(token, end="", flush=True)
             print()
         else:
-            prompt = PROMPT_TEMPLATE.format(context=context, question=question)
+            prompt = build_rag_prompt(context, question, include_manifesto=True)
             answer = lora_rag.generate(prompt)
             # Extract the assistant response part
             if "<|assistant|>" in answer:
@@ -159,7 +160,10 @@ def main():
             src = d.metadata.get("source_file", "?")
             pages = d.metadata.get("pages", "?")
             cat = d.metadata.get("category", "?")
-            print(f"  [{i+1}] {src} (págs: {pages}, cat: {cat})")
+            inst = d.metadata.get("institution", "?")
+            author = d.metadata.get("author", "?")
+            year = d.metadata.get("year", "?")
+            print(f"  [{i+1}] {inst} / {author} — {src} ({year}, pág. {pages}, cat: {cat})")
 
     if args.query:
         query(args.query)

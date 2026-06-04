@@ -11,14 +11,23 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 
 BASE_DIR = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(BASE_DIR / "src"))
+from _format import (
+    format_docs_with_attribution,
+    load_manifesto,
+    build_rag_prompt,
+)
+
 VECTORDB_DIR = BASE_DIR / "vectordb"
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 COLLECTION_NAME = "seguridad_mexico"
 OLLAMA_MODEL = "qwen2.5:0.5b"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
-PROMPT_TEMPLATE = """Eres un asistente experto en seguridad pública en México.
-Usa SOLO el contexto proporcionado para responder.
+PROMPT_TEMPLATE_OLLAMA = """{manifesto_section}Eres un asistente experto en seguridad pública en México.
+Responde SOLO con la información del contexto proporcionado.
+Cuando el contexto incluya datos cuantitativos, cita la institución y el título.
+Si hay disenso entre autores, presenta las múltiples perspectivas.
 
 Contexto:
 {context}
@@ -35,7 +44,7 @@ SKIP_PREFIXES = [
 
 
 def format_docs(docs):
-    return "\n\n".join(d.page_content for d in docs)
+    return format_docs_with_attribution(docs)
 
 
 def load_vectorstore():
@@ -87,7 +96,13 @@ def query_once(question, k=5, model=OLLAMA_MODEL):
     show_sources(docs, "Contexto")
 
     context = format_docs(docs)
-    prompt = PROMPT_TEMPLATE.format(context=context, question=question)
+    manifesto = load_manifesto()
+    manifesto_section = f"{manifesto}\n\n" if manifesto else ""
+    prompt = PROMPT_TEMPLATE_OLLAMA.format(
+        manifesto_section=manifesto_section,
+        context=context,
+        question=question,
+    )
 
     print(f"\n  Generando respuesta ({model})...\n", flush=True)
     t0 = time.time()
@@ -171,7 +186,13 @@ def run_cli(model=OLLAMA_MODEL):
 
         # generar respuesta
         context = format_docs(docs)
-        prompt = PROMPT_TEMPLATE.format(context=context, question=question)
+        manifesto = load_manifesto()
+        manifesto_section = f"{manifesto}\n\n" if manifesto else ""
+        prompt = PROMPT_TEMPLATE_OLLAMA.format(
+            manifesto_section=manifesto_section,
+            context=context,
+            question=question,
+        )
 
         print(f"\n  Generando respuesta ({model})...\n", flush=True)
         try:

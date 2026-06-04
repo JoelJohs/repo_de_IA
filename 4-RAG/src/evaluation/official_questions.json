@@ -48,5 +48,20 @@
     "id": "Q10",
     "nivel": "analisis",
     "pregunta": "A partir de las conclusiones de los autores en el corpus, ¿qué vacíos de información, subregistros o falta de datos fiables se identifican como el principal obstáculo para medir la violencia real en el país?"
+  },
+  {
+    "id": "Q11",
+    "nivel": "meta",
+    "pregunta": "¿Quién es el autor del corpus y cuáles son sus principales características?"
+  },
+  {
+    "id": "Q12",
+    "nivel": "meta",
+    "pregunta": "¿Qué piensan los distintos autores del corpus sobre la militarización en México? ¿Hay consenso o disenso entre ellos?"
+  },
+  {
+    "id": "Q13",
+    "nivel": "meta",
+    "pregunta": "Si tuvieras que atribuirle una postura al corpus en su conjunto, ¿cuál sería? ¿Es justa esa atribución dado que es un corpus plural?"
   }
 ]

@@ -18,6 +18,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent.parent
 OUTPUT_DIR = BASE_DIR / "datasets"
 OUTPUT_FILE = OUTPUT_DIR / "finetuning.jsonl"
+ATRRIBUTION_FILE = OUTPUT_DIR / "atribution_examples.jsonl"
 
 
 DOCUMENTOS = [
@@ -312,6 +313,19 @@ def main():
         for ex in all_examples:
             rec = {k: v for k, v in ex.items() if k != "type"}
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
+    attribution_count = 0
+    if ATRRIBUTION_FILE.exists():
+        with open(ATRRIBUTION_FILE) as f_in, open(OUTPUT_FILE, "a") as f_out:
+            for line in f_in:
+                line = line.strip()
+                if not line:
+                    continue
+                rec = json.loads(line)
+                rec["behavior"] = "atribucion"
+                f_out.write(json.dumps(rec, ensure_ascii=False) + "\n")
+                attribution_count += 1
+        print(f"  Atribución:      {attribution_count} (merge desde atribution_examples.jsonl)")
 
     print("=" * 60)
     print(f"  Dataset generado: {OUTPUT_FILE}")

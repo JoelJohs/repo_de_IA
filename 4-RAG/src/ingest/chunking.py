@@ -70,6 +70,9 @@ def chunk_document(doc_meta):
             "metadata": {
                 "category": doc_meta["categoria"],
                 "document_title": doc_meta["titulo"],
+                "author": doc_meta.get("autor", "Desconocido"),
+                "institution": doc_meta.get("institucion", "Desconocida"),
+                "year": doc_meta.get("anio"),
                 "source_file": doc_meta["archivo"],
                 "pages": page_range,
                 "chunk_index": idx,
