@@ -6,7 +6,7 @@ from typing import Deque, Optional, Tuple
 
 import pygame
 
-from core.constantes import BASE_H, BASE_W, EXTRA_SCALE
+from core.constantes import BASE_H, BASE_W, EXTRA_SCALE, WINDOW_FRACTION
 from ml.dataset import exportar_datos_csv, registrar_decision_manual
 from ml.arbol import decision_auto_arbol, entrenar_arbol
 from ml.modelo import decision_auto_saltar, entrenar_modelo
@@ -28,11 +28,9 @@ from .estado import (
     ModelState,
     PlayerState,
     RenderState,
-    ScoreState,
 )
-from .fisica import aplicar_salto, iniciar_agacharse, iniciar_salto, terminar_agacharse
+from .fisica import actualizar_agacharse, aplicar_salto, iniciar_agacharse, iniciar_salto
 from .loop import procesar_eventos
-from .puntaje import calcular_bonus_esquiva
 
 
 class Juego:
@@ -43,12 +41,13 @@ class Juego:
             os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "audio"
         )
 
-        self._flags = 0
+        self._flags = pygame.RESIZABLE
         self._fullscreen = False
 
-        start_w = BASE_W
-        start_h = BASE_H
-        self.pantalla = pygame.display.set_mode((start_w, start_h), self._flags)
+        start_w, start_h = self._fit_window_to_screen()
+        self.pantalla = pygame.display.set_mode(
+            (start_w, start_h), self._flags
+        )
         pygame.display.set_caption("Juego: Bala + salto + MLP (solo memoria)")
 
         self.corriendo = True
@@ -69,24 +68,9 @@ class Juego:
         )
 
         self._accion_manual = 0
-        self._crouch_hold = False
         self._estilo_hist: Deque[int] = deque(maxlen=200)
         self._estilo_min_muestras = 40
         self._estilo_umbral = 0.55
-        self._auto_crouch_hold_frames = 0
-        self._auto_crouch_hold_max = 20
-        self._auto_crouch_hold_infinite = False
-        self._auto_crouch_cycle = False
-        self._auto_crouch_on_remaining = 0
-        self._auto_crouch_off_remaining = 0
-        self._auto_crouch_on_len = 0
-        self._auto_crouch_off_len = 0
-
-        self._manual_prev_agachado = False
-        self._manual_crouch_frames = 0
-        self._manual_stand_frames = 0
-        self._crouch_durations: Deque[int] = deque(maxlen=60)
-        self._crouch_pauses: Deque[int] = deque(maxlen=60)
 
         self.decision_window = 500
         self.decision_record_every = 3
@@ -94,7 +78,8 @@ class Juego:
 
         self.w, self.h = start_w, start_h
         self.scale = 1.0
-        self.margin = 50
+        self.margin_x = 50
+        self.margin_top = 100
         self.ground_y = self.h - 100
         self.player_size = (60, 96)
         self.bullet_size = (64, 64)
@@ -107,22 +92,37 @@ class Juego:
         self.anim = AnimationState(current_frame=0, frame_speed=10, frame_count=0)
         self.render = RenderState(fondo_x1=0, fondo_x2=start_w)
 
-        self._puntaje_frame = 1
-        self._puntaje_esquiva_base = 25
-        self._puntaje_esquiva_umbral = 200
         self.mostrar_hitbox = False
         self._hitbox_bala_scale = 0.4
 
         self._apply_resolution(start_w, start_h, reset_positions=True)
         self._reset_estado_juego()
 
+    def _fit_window_to_screen(self) -> Tuple[int, int]:
+        try:
+            info = pygame.display.Info()
+            max_w = info.current_w or BASE_W
+            max_h = info.current_h or BASE_H
+        except Exception:
+            return BASE_W, BASE_H
+        target_ratio = BASE_W / BASE_H
+        screen_ratio = max_w / max_h
+        if screen_ratio >= target_ratio:
+            h = max(1, int(max_h * WINDOW_FRACTION))
+            w = max(BASE_W // 2, int(h * target_ratio))
+        else:
+            w = max(1, int(max_w * WINDOW_FRACTION))
+            h = max(BASE_H // 2, int(w / target_ratio))
+        return w, h
+
     def _apply_resolution(self, w: int, h: int, reset_positions: bool) -> None:
         self.w, self.h = int(w), int(h)
 
-        self.scale = min(self.w / BASE_W, self.h / BASE_H) * EXTRA_SCALE
+        self.scale = (self.w / BASE_W) * EXTRA_SCALE
         self.scale = max(1.0, self.scale)
 
-        self.margin = int(50 * self.scale)
+        self.margin_x = int(self.w * 0.06)
+        self.margin_top = int(self.h * 0.10)
         ground_offset = int(100 * self.scale)
         ground_adjust = int(100 * self.scale)
         self.ground_y = self.h - ground_offset - ground_adjust
@@ -135,7 +135,6 @@ class Juego:
         self.salto_vel_inicial = 15 * self.scale
         self.salto_vel_inicial *= 1.15
         self.gravedad = 1 * self.scale
-        self._puntaje_esquiva_umbral = int(200 * self.scale)
 
         self.decision_window = int(500 * self.scale)
 
@@ -146,16 +145,16 @@ class Juego:
 
         if reset_positions or not hasattr(self, "jugador"):
             self.jugador = pygame.Rect(
-                self.margin, self.ground_y, self.player_size[0], self.player_size[1]
+                self.margin_x, self.ground_y, self.player_size[0], self.player_size[1]
             )
             self.bala = pygame.Rect(
-                self.w - self.margin,
+                self.w - self.margin_x - self.bullet_size[0],
                 self.ground_y + int(10 * self.scale),
                 self.bullet_size[0],
                 self.bullet_size[1],
             )
             nave_y = self.ground_y + self.player_size[1] - self.ship_size[1]
-            nave_x = self.w - self.ship_size[0] - int(40 * self.scale)
+            nave_x = self.w - self.ship_size[0] - self.margin_x
             self.nave = pygame.Rect(nave_x, nave_y, self.ship_size[0], self.ship_size[1])
 
         self.player = PlayerState(
@@ -164,6 +163,7 @@ class Juego:
             en_suelo=True,
             salto_vel=self.salto_vel_inicial,
             agachado=False,
+            agachado_timer=0,
         )
         self.bullet = BulletState(
             rect=self.bala,
@@ -171,12 +171,6 @@ class Juego:
             disparada=False,
             arriba=False,
             dist_min=None,
-        )
-        self.score = ScoreState(
-            valor=0,
-            por_frame=self._puntaje_frame,
-            esquiva_base=self._puntaje_esquiva_base,
-            esquiva_umbral=self._puntaje_esquiva_umbral,
         )
 
     def _cargar_assets(self) -> None:
@@ -205,45 +199,51 @@ class Juego:
             self.pantalla = pygame.display.set_mode((w, h), pygame.FULLSCREEN)
             self._apply_resolution(w, h, reset_positions=True)
         else:
-            self.pantalla = pygame.display.set_mode((BASE_W, BASE_H), self._flags)
-            self._apply_resolution(BASE_W, BASE_H, reset_positions=True)
+            w, h = self._fit_window_to_screen()
+            self.pantalla = pygame.display.set_mode((w, h), self._flags)
+            self._apply_resolution(w, h, reset_positions=True)
         self._reset_estado_juego()
 
+    def _on_resize(self, w: int, h: int) -> None:
+        w = max(320, int(w))
+        h = max(240, int(h))
+        self.pantalla = pygame.display.set_mode((w, h), self._flags)
+        had_positions = hasattr(self, "jugador")
+        self._apply_resolution(w, h, reset_positions=not had_positions)
+        if had_positions:
+            self.jugador.x = self.margin_x
+            self.jugador.y = self.ground_y
+            self.jugador.height = self.player_size[1]
+            self.nave.x = self.w - self.ship_size[0] - self.margin_x
+            self.nave.y = self.ground_y + self.player_size[1] - self.ship_size[1]
+            self.bala.x = self.w - self.margin_x - self.bullet_size[0]
+            self.bala.y = self.ground_y + int(10 * self.scale)
+            self.render.fondo_x1 = 0
+
     def _reset_estado_juego(self) -> None:
-        self.jugador.x, self.jugador.y = self.margin, self.ground_y
-        self.nave.x = self.w - self.ship_size[0] - int(40 * self.scale)
+        self.jugador.x = self.margin_x
+        self.jugador.y = self.ground_y
+        self.jugador.height = self.player_size[1]
+        self.nave.x = self.w - self.ship_size[0] - self.margin_x
         self.nave.y = self.ground_y + self.player_size[1] - self.ship_size[1]
-        self.bala.x = self.w - self.margin
+        self.bala.x = self.w - self.margin_x - self.bullet_size[0]
         self.bala.y = self.ground_y + int(10 * self.scale)
 
         self.player.salto = False
         self.player.en_suelo = True
         self.player.salto_vel = self.salto_vel_inicial
         self.player.agachado = False
+        self.player.agachado_timer = 0
 
         self.bullet.disparada = False
         self.bullet.velocidad = int(-10 * self.scale)
         self.bullet.arriba = False
         self.bullet.dist_min = None
 
-        self.score.valor = 0
         self.render.fondo_x1 = 0
         self.render.fondo_x2 = self.w
         self._decision_frame_counter = 0
         self._accion_manual = 0
-        self._crouch_hold = False
-        self._auto_crouch_hold_frames = 0
-        self._auto_crouch_hold_infinite = False
-        self._auto_crouch_cycle = False
-        self._auto_crouch_on_remaining = 0
-        self._auto_crouch_off_remaining = 0
-        self._auto_crouch_on_len = 0
-        self._auto_crouch_off_len = 0
-        self._manual_prev_agachado = False
-        self._manual_crouch_frames = 0
-        self._manual_stand_frames = 0
-        self._crouch_durations.clear()
-        self._crouch_pauses.clear()
 
     def _musica_menu(self) -> None:
         ruta = os.path.join(self._audio_base, "menu.mp3")
@@ -272,19 +272,6 @@ class Juego:
         self.model.accion_auto = "none"
         self._estilo_hist.clear()
         self._accion_manual = 0
-        self._crouch_hold = False
-        self._auto_crouch_hold_frames = 0
-        self._auto_crouch_hold_infinite = False
-        self._auto_crouch_cycle = False
-        self._auto_crouch_on_remaining = 0
-        self._auto_crouch_off_remaining = 0
-        self._auto_crouch_on_len = 0
-        self._auto_crouch_off_len = 0
-        self._manual_prev_agachado = False
-        self._manual_crouch_frames = 0
-        self._manual_stand_frames = 0
-        self._crouch_durations.clear()
-        self._crouch_pauses.clear()
 
     def _calcular_hitbox_bala(self) -> pygame.Rect:
         size = max(1, int(self.bullet_size[0] * self._hitbox_bala_scale))
@@ -311,14 +298,13 @@ class Juego:
             1
             if self.player.salto or self._accion_manual == 1
             else 2
-            if self.player.agachado or self._crouch_hold
+            if self.player.agachado
             else 0
         )
         ataque_color = 1 if self.bullet.arriba else 0
         self._estilo_hist.append(accion)
         registrar_decision_manual(
             self.model.datos,
-            self.bullet.disparada,
             self.jugador.x,
             self.bala.x,
             self.bala.y,
@@ -326,7 +312,6 @@ class Juego:
             self.player.agachado,
             accion,
             self.bullet.velocidad,
-            self.score.valor,
             self.bullet.arriba,
             ataque_color,
         )
@@ -343,57 +328,6 @@ class Juego:
         if ratio >= self._estilo_umbral:
             return accion_dom
         return None
-
-    def _actualizar_patron_agacharse_manual(self) -> None:
-        agachado = self.player.agachado or self._crouch_hold
-        if agachado:
-            self._manual_crouch_frames += 1
-            if not self._manual_prev_agachado and self._manual_stand_frames > 0:
-                self._crouch_pauses.append(self._manual_stand_frames)
-                self._manual_stand_frames = 0
-        else:
-            self._manual_stand_frames += 1
-            if self._manual_prev_agachado and self._manual_crouch_frames > 0:
-                self._crouch_durations.append(self._manual_crouch_frames)
-                self._manual_crouch_frames = 0
-        self._manual_prev_agachado = agachado
-
-    def _clamp(self, value: int, min_value: int, max_value: int) -> int:
-        return max(min_value, min(max_value, value))
-
-    def _calcular_patron_agacharse(self) -> Tuple[int, int]:
-        base_on_min = int(6 * self.scale)
-        base_on_max = int(45 * self.scale)
-        base_off_min = int(6 * self.scale)
-        base_off_max = int(60 * self.scale)
-        if not self._crouch_durations:
-            dur = int(14 * self.scale)
-        else:
-            dur = int(sum(self._crouch_durations) / len(self._crouch_durations))
-        if not self._crouch_pauses:
-            pausa = int(12 * self.scale)
-        else:
-            pausa = int(sum(self._crouch_pauses) / len(self._crouch_pauses))
-        dur = self._clamp(dur, base_on_min, base_on_max)
-        pausa = self._clamp(pausa, base_off_min, base_off_max)
-        return dur, pausa
-
-    def _aplicar_ciclo_agacharse_auto(self) -> int:
-        if not self._auto_crouch_cycle:
-            return 2
-        if self._auto_crouch_on_remaining <= 0 and self._auto_crouch_off_remaining <= 0:
-            self._auto_crouch_on_remaining = self._auto_crouch_on_len
-        if self._auto_crouch_on_remaining > 0:
-            self._auto_crouch_on_remaining -= 1
-            if self._auto_crouch_on_remaining == 0:
-                self._auto_crouch_off_remaining = self._auto_crouch_off_len
-            return 2
-        if self._auto_crouch_off_remaining > 0:
-            self._auto_crouch_off_remaining -= 1
-            if self._auto_crouch_off_remaining == 0:
-                self._auto_crouch_on_remaining = self._auto_crouch_on_len
-            return 0
-        return 0
 
     def entrenar_modelo(self) -> Tuple[bool, str]:
         modelo, scaler, clase_unica, mensaje = entrenar_modelo(self.model.datos)
@@ -431,7 +365,6 @@ class Juego:
                 self.bala.x,
                 self.bala.y,
                 self.bullet.velocidad,
-                self.score.valor,
                 self.bullet.arriba,
             )
         else:
@@ -447,29 +380,12 @@ class Juego:
                 self.bala.x,
                 self.bala.y,
                 self.bullet.velocidad,
-                self.score.valor,
                 self.bullet.arriba,
             )
         self.model.ultima_proba = proba_salto
         accion_estilo = self._obtener_accion_estilo()
         if accion_estilo is not None:
             accion = accion_estilo
-            if accion_estilo == 2:
-                self._auto_crouch_hold_infinite = False
-                self._auto_crouch_cycle = True
-                on_len, off_len = self._calcular_patron_agacharse()
-                if on_len != self._auto_crouch_on_len or off_len != self._auto_crouch_off_len:
-                    self._auto_crouch_on_len = on_len
-                    self._auto_crouch_off_len = off_len
-                    self._auto_crouch_on_remaining = on_len
-                    self._auto_crouch_off_remaining = 0
-            else:
-                self._auto_crouch_cycle = False
-        else:
-            self._auto_crouch_hold_infinite = False
-            self._auto_crouch_cycle = False
-            if accion == 2:
-                self._auto_crouch_hold_frames = self._auto_crouch_hold_max
         self.model.accion_auto = (
             "salta" if accion == 1 else "agacha" if accion == 2 else "none"
         )
@@ -551,11 +467,9 @@ class Juego:
 
     def _update_background(self) -> None:
         self.render.fondo_x1 -= self.fondo_speed
-        self.render.fondo_x2 -= self.fondo_speed
         if self.render.fondo_x1 <= -self.w:
-            self.render.fondo_x1 = self.w
-        if self.render.fondo_x2 <= -self.w:
-            self.render.fondo_x2 = self.w
+            self.render.fondo_x1 += self.w
+        self.render.fondo_x2 = self.render.fondo_x1 + self.w
 
     def _update_bullet(self) -> None:
         if self.bullet.disparada:
@@ -563,15 +477,8 @@ class Juego:
                 self.bala, self.bullet.velocidad, self.jugador.x, self.bullet.dist_min
             )
         if self.bala.x < -self.bullet_size[0]:
-            bonus = calcular_bonus_esquiva(
-                self.bullet.dist_min,
-                self.score.esquiva_umbral,
-                self.score.esquiva_base,
-            )
-            if bonus:
-                self.score.valor += bonus
             self.bullet.disparada, self.bullet.arriba, self.bullet.dist_min = reset_bala(
-                self.bala, self.w - self.margin
+                self.bala, self.w - self.margin_x - self.bullet_size[0]
             )
 
     def _update_player(self) -> None:
@@ -586,6 +493,13 @@ class Juego:
             self.player.salto = salto
             self.player.salto_vel = salto_vel if salto else self.salto_vel_inicial
             self.player.en_suelo = en_suelo
+
+        agachado, timer = actualizar_agacharse(
+            self.player.agachado,
+            self.player.agachado_timer,
+        )
+        self.player.agachado = agachado
+        self.player.agachado_timer = timer
 
     def _render(self) -> None:
         dibujar_fondo(
@@ -623,11 +537,6 @@ class Juego:
             )
             self.pantalla.blit(accion_render, (10, 30))
 
-        score_txt = self.fuente_chica.render(
-            f"puntaje={self.score.valor}", True, (255, 220, 120)
-        )
-        self.pantalla.blit(score_txt, (10, 50))
-
         if self.mostrar_hitbox:
             pygame.draw.rect(self.pantalla, (80, 220, 80), self.jugador, 2)
             pygame.draw.rect(self.pantalla, (240, 80, 80), self.bala, 1)
@@ -658,9 +567,9 @@ class Juego:
                 on_quit=lambda: setattr(self, "corriendo", False),
                 on_menu=self._accion_volver_menu,
                 on_fullscreen=self._toggle_fullscreen,
+                on_resize=self._on_resize,
                 on_jump=self._accion_salto_manual,
-                on_crouch_start=self._accion_agacharse,
-                on_crouch_end=self._accion_terminar_agacharse,
+                on_crouch_press=self._accion_agacharse_manual,
             )
 
             if not self.corriendo:
@@ -668,38 +577,13 @@ class Juego:
 
             if self.modo_auto:
                 accion, _ = self._decidir_accion_auto()
-                if self._auto_crouch_cycle and accion == 2:
-                    accion = self._aplicar_ciclo_agacharse_auto()
                 if accion == 1:
                     self.player.salto = iniciar_salto(
                         self.jugador, self.player.en_suelo, self.player.agachado
                     )
                 elif accion == 2:
-                    self.player.agachado = iniciar_agacharse(
-                        self.jugador, self.player.agachado, self.player.en_suelo, self.player_size[1]
-                    )
-                elif self.player.agachado:
-                    if self._auto_crouch_hold_infinite:
-                        self.player.agachado = iniciar_agacharse(
-                            self.jugador,
-                            self.player.agachado,
-                            self.player.en_suelo,
-                            self.player_size[1],
-                        )
-                    elif self._auto_crouch_hold_frames > 0:
-                        self.player.agachado = iniciar_agacharse(
-                            self.jugador,
-                            self.player.agachado,
-                            self.player.en_suelo,
-                            self.player_size[1],
-                        )
-                        self._auto_crouch_hold_frames -= 1
-                    else:
-                        self.player.agachado = terminar_agacharse(
-                            self.jugador, self.player.agachado, self.player_size[1]
-                        )
+                    self._iniciar_impulso_agacharse_auto()
             else:
-                self._actualizar_patron_agacharse_manual()
                 self.registrar_decision_manual()
 
             if not self.bullet.disparada:
@@ -713,8 +597,6 @@ class Juego:
                     self.player_size[1],
                     self.bullet_size[1],
                 )
-
-            self.score.valor += self.score.por_frame
 
             self._update_frame()
             pygame.display.flip()
@@ -733,16 +615,19 @@ class Juego:
         self._reset_estado_juego()
         self.mostrar_menu()
 
-    def _accion_agacharse(self) -> None:
-        self.player.agachado = iniciar_agacharse(
-            self.jugador, self.player.agachado, self.player.en_suelo, self.player_size[1]
-        )
-        if self.player.agachado:
-            self._crouch_hold = True
+    def _accion_agacharse_manual(self) -> None:
+        if self.player.agachado_timer > 0 or not self.player.en_suelo:
+            return
+        agachado, timer = iniciar_agacharse(self.player.en_suelo)
+        if agachado:
+            self.player.agachado = True
+            self.player.agachado_timer = timer
+            self._accion_manual = 2
 
-    def _accion_terminar_agacharse(self) -> None:
-        self.player.agachado = terminar_agacharse(
-            self.jugador, self.player.agachado, self.player_size[1]
-        )
-        if not self.player.agachado:
-            self._crouch_hold = False
+    def _iniciar_impulso_agacharse_auto(self) -> None:
+        if self.player.agachado_timer > 0:
+            return
+        agachado, timer = iniciar_agacharse(self.player.en_suelo)
+        if agachado:
+            self.player.agachado = True
+            self.player.agachado_timer = timer

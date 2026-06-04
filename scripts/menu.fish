@@ -90,11 +90,13 @@ function main_screen
     echo
     echo "  $c_opt 2$c_reset  🐾 CNN Clasificación Animales$(status_icon cnn)"
     echo "       $c_dim Red convolucional que distingue 5 especies:"
-    echo "       rana·araña·mono·ballena·pájaro — precisión 76%$c_reset"
+    echo "       rana·araña·mono·ballena·pájaro — precisión 76%"
+    echo "       UI PyQt6 integrada (opción 6 del submenú)$c_reset"
     echo
     echo "  $c_opt 3$c_reset  ⌨️  RNN Autocompletado C$(status_icon rnn)"
     echo "       $c_dim Red recurrente char-level que completa código"
-    echo "       fuente en C. Entrenada con 60+ funciones reales.$c_reset"
+    echo "       fuente en C. Entrenada con 60+ funciones reales."
+    echo "       Integración VSCode (F5) vía Ctrl+Shift+Space.$c_reset"
     echo
     echo "  $c_opt 4$c_reset  📚 RAG Seguridad Pública MX$(status_icon rag)"
     echo "       $c_dim Pipeline de Retrieval-Augmented Generation sobre"
@@ -178,6 +180,10 @@ function cnn_menu
         echo
         echo "  $c_opt 4$c_reset  Notebook: entrenamiento y arquitectura"
         echo "  $c_opt 5$c_reset  Notebook: inferencia y resultados"
+        echo "  $c_opt 6$c_reset  INTERFAZ gráfica PyQt6 (explorar + comparar) $(note_if_missing cnn)"
+        echo "       $c_dim Ventana oscura: 5 clases con conteo, selector de"
+        echo "       imágenes (test/ o dataset/) y predicción vs clase real"
+        echo "       con top-3, tiempo de inferencia y ✅/❌$c_reset"
         echo "  $c_opt B$c_reset  ← Volver"
         echo
         echo -n "  $c_opt >>>$c_reset "
@@ -192,6 +198,7 @@ function cnn_menu
             case 3; run_script trains/train_cnn
             case 4; run_notebook 2-CNN_entrenamiento
             case 5; run_notebook 2-CNN_inferencia
+            case 6; run_script cnn_ui
             case b B; return 0
             case '*'
                 echo "$c_err  Opción inválida$c_reset"; sleep 1
@@ -226,9 +233,13 @@ function rnn_menu
         echo "  $c_opt 2$c_reset  ENTRENAR modelo desde cero"
         echo "       Pipeline: curar corpus → preprocesar → entrenar 80 epochs"
         echo
-        echo "  $c_opt 3$c_reset  Notebook: entrenamiento y análisis"
-        echo "  $c_opt 4$c_reset  Notebook: inferencia interactiva"
-        echo "  $c_opt B$c_reset  ← Volver"
+    echo "  $c_opt 3$c_reset  Notebook: entrenamiento y análisis"
+    echo "  $c_opt 4$c_reset  Notebook: inferencia interactiva"
+    echo "  $c_opt 5$c_reset  ABRIR extensión VSCode (F5 + Extension Dev Host) $(note_if_missing rnn)"
+    echo "       $c_dim Lanza VSCode con la extension cargada en modo dev."
+    echo "       $c_dim Apretar F5 → se abre la Extension Development Host"
+    echo "       $c_dim → abrir prueba.c → Ctrl+Shift+Space en cualquier línea.$c_reset"
+    echo "  $c_opt B$c_reset  ← Volver"
         echo
         echo -n "  $c_opt >>>$c_reset "
         read -l opt
@@ -241,6 +252,7 @@ function rnn_menu
             case 2; run_script trains/train_rnn
             case 3; run_notebook 3-RNN_entrenamiento
             case 4; run_notebook 3-RNN_inferencia
+            case 5; run_script rnn --vscode
             case b B; return 0
             case '*'
                 echo "$c_err  Opción inválida$c_reset"; sleep 1

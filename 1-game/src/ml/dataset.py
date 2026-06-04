@@ -7,7 +7,6 @@ from core.tipos import Sample
 
 def registrar_decision_manual(
     datos_modelo: List[Sample],
-    bala_disparada: bool,
     jugador_x: int,
     bala_x: int,
     bala_y: int,
@@ -15,12 +14,9 @@ def registrar_decision_manual(
     agachado: bool,
     accion: int,
     velocidad_bala: int,
-    puntaje: int,
     bala_arriba: bool,
     ataque_color: int,
 ) -> None:
-    if not bala_disparada:
-        return
     distancia = abs(jugador_x - bala_x)
     salto_label = 0 if en_suelo else 1
     datos_modelo.append(
@@ -32,7 +28,6 @@ def registrar_decision_manual(
             bala_arriba=1 if bala_arriba else 0,
             agachado=1 if agachado else 0,
             accion=int(accion),
-            puntaje=int(puntaje),
             ataque_color=int(ataque_color),
         )
     )
@@ -56,7 +51,6 @@ def exportar_datos_csv(datos_modelo: List[Sample], base_dir: str) -> str:
                     "bala_arriba",
                     "agachado",
                     "accion",
-                    "puntaje",
                     "ataque_color",
                 ]
             )
@@ -70,7 +64,6 @@ def exportar_datos_csv(datos_modelo: List[Sample], base_dir: str) -> str:
                         s.bala_arriba,
                         s.agachado,
                         s.accion,
-                        s.puntaje,
                         s.ataque_color,
                     ]
                 )

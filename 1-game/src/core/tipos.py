@@ -11,7 +11,6 @@ class Sample:
     bala_arriba: int
     agachado: int
     accion: int
-    puntaje: int
     ataque_color: int
 
 

@@ -23,7 +23,9 @@ Controles: `M` manual · `A` automático · `T` entrenar · `C` exportar CSV · 
 ## 2-CNN — CNN animales
 
 ```
-./scripts/cnn.fish --predict 2-CNN/models/best_model.keras ruta/a/imagen.jpg
+./scripts/cnn.fish                                    # predecir todo test/
+./scripts/cnn.fish 2-CNN/models/best_model.keras rana.jpg
+./scripts/cnn_ui.fish                                 # GUI PyQt6 (explorar + predecir)
 ./scripts/trains/train_cnn.fish                       # entrenar
 ```
 
@@ -38,11 +40,14 @@ Entrenar requiere dataset en `2-CNN/dataset/`. Construirlo:
 ./scripts/rnn.fish --predict "int sum"
 ./scripts/rnn.fish --predict "int sum" --max-new 80
 echo "void swap" | ./scripts/rnn.fish --predict
+./scripts/rnn.fish --vscode                          # abre VSCode (F5) con la extension en dev
+./scripts/rnn.fish --vscode prod                     # empaqueta + instala la .vsix
+./scripts/rnn.fish --vscode test                     # smoke test headless
 ./scripts/trains/train_rnn.fish                       # entrenar (~5 min CPU)
 ```
 
 API: `uvicorn 3-RNN.src.api:app --port 8000`
-VS Code: `./scripts/vscode.fish`
+VS Code (alias equivalente): `./scripts/vscode.fish`
 
 ---
 
@@ -82,6 +87,7 @@ Notebooks: `notebooks/index.ipynb` (landing page con los 7 notebooks)
 | `setup.fish` | Setup inicial (pyenv, venv, pip install) |
 | `game.fish` | Ejecutar juego 1-game |
 | `cnn.fish` | Inferencia CNN |
+| `cnn_ui.fish` | GUI PyQt6 (explorar + predecir) |
 | `rnn.fish` | Predicción RNN |
 | `rag.fish` | Pipeline RAG completo |
 | `jupyter.fish` | Lanzar Jupyter |

@@ -52,11 +52,22 @@ ipython_config.py
 # Datasets crudos / procesados
 data/
 dataset/
-datasets/
+datasets/**
 !datasets/*.py
+!datasets/*.jsonl
 raw/
-processed/
+# corpus/processed/ se regenera en Colab, pero permitimos 2 archivos de identidad
+4-RAG/corpus/processed/chunks.jsonl
+4-RAG/corpus/processed/chunks.jsonl.bak
+4-RAG/corpus/processed/*.jsonl
+4-RAG/corpus/processed/*.npy
+4-RAG/corpus/processed/*.npz
 downloads/
+prerender/
+
+# Permitir la identidad del corpus (inyectada en el system prompt)
+!4-RAG/corpus/processed/MANIFIESTO.md
+!4-RAG/corpus/processed/AUTORES.md
 
 # Resultados/outputs típicos
 outputs/
@@ -65,6 +76,9 @@ results/
 runs/
 logs/
 log/
+4-RAG/src/evaluation/results.json
+4-RAG/src/evaluation/test_bank.json
+4-RAG/results/
 
 # Cachés de herramientas ML
 .cache/

@@ -15,6 +15,7 @@ class PlayerState:
     en_suelo: bool
     salto_vel: float
     agachado: bool
+    agachado_timer: int
 
 
 @dataclass
@@ -24,14 +25,6 @@ class BulletState:
     disparada: bool
     arriba: bool
     dist_min: Optional[int]
-
-
-@dataclass
-class ScoreState:
-    valor: int
-    por_frame: int
-    esquiva_base: int
-    esquiva_umbral: int
 
 
 @dataclass

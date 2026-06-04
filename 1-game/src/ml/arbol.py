@@ -24,7 +24,6 @@ def entrenar_arbol(
             s.distancia,
             s.bala_y,
             float(s.bala_arriba),
-            float(s.puntaje),
             float(s.ataque_color),
         ]
         for s in samples
@@ -64,7 +63,6 @@ def decision_auto_arbol(
     bala_x: int,
     bala_y: int,
     velocidad_bala: int,
-    puntaje: int,
     bala_arriba: bool,
 ) -> Tuple[int, Optional[float]]:
     if (not bala_disparada) or (not en_suelo):
@@ -85,7 +83,6 @@ def decision_auto_arbol(
             float(distancia),
             float(bala_y),
             1.0 if bala_arriba else 0.0,
-            float(puntaje),
             1.0 if bala_arriba else 0.0,
         ]
     ]

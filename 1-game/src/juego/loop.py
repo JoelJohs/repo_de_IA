@@ -10,13 +10,15 @@ def procesar_eventos(
     on_quit,
     on_menu,
     on_fullscreen,
+    on_resize,
     on_jump,
-    on_crouch_start,
-    on_crouch_end,
+    on_crouch_press,
 ):
     for e in eventos:
         if e.type == pygame.QUIT:
             on_quit()
+        elif e.type == pygame.VIDEORESIZE:
+            on_resize(e.w, e.h)
         elif e.type == pygame.KEYDOWN:
             if e.key == pygame.K_q:
                 on_quit()
@@ -28,8 +30,4 @@ def procesar_eventos(
                 on_jump()
             elif e.key in (pygame.K_DOWN, pygame.K_s):
                 if not modo_auto:
-                    on_crouch_start()
-        elif e.type == pygame.KEYUP:
-            if e.key in (pygame.K_DOWN, pygame.K_s):
-                if not modo_auto:
-                    on_crouch_end()
+                    on_crouch_press()
